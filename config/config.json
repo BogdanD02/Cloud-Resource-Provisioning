@@ -1,0 +1,84 @@
+{   
+    "Source-Config": [
+        {
+            "Type": "SAT",
+
+            "Path": "Models/MiniZinc/",
+            "Extension": "mzn",
+            
+            "Formalization": 2
+        },
+        {
+            "Type": "SMT",
+            
+            "Path": "Models/SMT/",
+            "Extension": "json",
+            
+            "Formalization": 2
+        }
+    ],
+
+    "Input-Config": [
+        {
+            "Type": "SAT",
+
+            "Path": "Input/MiniZinc/",
+            "Extension": "dzn",
+
+            "Offer-Numbers": [
+                20, 40, 250, 500
+            ]
+        },
+        {
+            "Type": "SMT",
+
+            "Path": "Input/SMT/",
+            "Extension": "json",
+
+            "Offer-Numbers": [
+                20, 40, 250, 500
+            ]
+        }
+    ],
+
+    "Surrogate-Config": [
+        {
+            "Type": "SAT",
+        
+            "Model-Path": "Surrogate/",
+            "Model-Extension": "mzn",
+            "Enabled": false,
+
+            "Output-Path": "Input/",
+            "Output-Extension": "csv"
+        },
+        {
+            "Model-Path": "Surrogate/SMT",
+            "Model-Extension": "json",
+            "Type": "SMT",
+
+            "Enabled": true,
+
+            "Output-Path": "Input/",
+            "Output-Extension": "csv"
+        }
+    ],
+
+    "Test-Config": {
+        "Repetitions": 3,
+
+        "Symmetry-Breaking": false,
+        "Symmetry-Breaker-List": [
+            "FV", "PR", "L", "LX",
+            "FVPR", "FVL", "FVLX", "PRL", "PRLX", "LPR", "LLX",
+            "FVPRL", "FVPRLX", "FVLPR", "FVLLX", "PRLLX", "LPRLX",
+            "FVPRLLX", "FVLPRLX"
+        ],
+
+        "Output-Path": "Output/",
+        
+        "Solver-Config-File": "config/solvers.json",
+        "Use-Case-Config-File": "config/useCases.json",
+        "SAT-SB-File": "config/symmetryBreaking.json"
+    }
+}

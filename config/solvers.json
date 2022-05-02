@@ -1,0 +1,36 @@
+{
+    "Solver-Types": [
+        "SAT", "SMT"
+    ],
+
+    "SAT-Solvers": [
+        {
+            "Name": "Chuffed",
+            "Keywd": "chuffed",
+            "Enabled": true
+        },
+        {
+            "Name": "GeCode",
+            "Keywd": "gecode",
+            "Enabled": false
+        },
+        {
+            "Name": "Google OR-Tools",
+            "Keywd": "or-tools",
+            "Enabled": false
+        }
+    ],
+
+    "SMT-Solvers": [
+        {
+            "Name": "Z3 Solver",
+            "Keywd": "z3",
+            "Enabled": true
+        },
+        {
+            "Name": "IBM CPLEX",
+            "Keywd": "cplex",
+            "Enabled": true
+        }
+    ] 
+}

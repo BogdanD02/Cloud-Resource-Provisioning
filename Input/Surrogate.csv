@@ -1,0 +1,14 @@
+Name,Instances,Estimated VMs
+WordPress,3,8
+WordPress,4,10
+WordPress,5,12
+WordPress,6,13
+WordPress,7,15
+WordPress,8,19
+WordPress,9,20
+WordPress,10,23
+WordPress,11,25
+WordPress,12,26
+Oryx2 Application,0,11
+Secure Web Container,0,6
+Secure Billing Email Service,0,5

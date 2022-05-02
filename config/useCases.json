@@ -1,0 +1,51 @@
+{
+    "Use-Cases": [
+        {
+            "Name": "WordPress", 
+            "Enabled": true,
+
+            "Model-Name": "Wordpress", 
+            "Scaling-Components": true, 
+            "Components": [
+                {
+                    "Name": "WPInstances",
+                    "Lower-Bound": 3,
+                    "Upper-Bound": 12
+                }
+            ],
+
+            "Surrogate-Problem": true, 
+            "Surrogate-Model-Name": "Wordpress_Surrogate"
+        }, 
+        {
+            "Name": "Oryx2 Application", 
+            "Enabled": true,
+            
+            "Model-Name": "Oryx2", 
+            "Scaling-Components": false, 
+            
+            "Surrogate-Problem": true, 
+            "Surrogate-Model-Name": "Oryx2_Surrogate"
+        }, 
+        {
+            "Name": "Secure Web Container", 
+            "Enabled": true,
+            
+            "Model-Name": "SecureWeb", 
+            "Scaling-Components": false, 
+            
+            "Surrogate-Problem": true, 
+            "Surrogate-Model-Name": "SecureWeb_Surrogate"
+        }, 
+        {
+            "Name": "Secure Billing Email Service", 
+            "Enabled": true,
+            
+            "Model-Name": "SecureBilling", 
+            "Scaling-Components": false, 
+            
+            "Surrogate-Problem": true, 
+            "Surrogate-Model-Name": "SecureBilling_Surrogate"
+        }
+    ]
+}
