@@ -1,13 +1,13 @@
-from model import prepare_model
+from src.model import prepare_model
 from minizinc import Instance, Model, Solver
 from csv import DictReader, DictWriter
 from time import time
 from datetime import timedelta
 from os.path import exists
-from init import log, create_directory, parse_config
-from surrogate import build_surrogate, build_components
-import init
-import smt
+from src.init import log, create_directory, parse_config
+from src.surrogate import build_surrogate, build_components
+import src.init
+import src.smt
 
 """
 This script interprets the configuration file and runs the test cases
@@ -53,9 +53,9 @@ def prepare_minizinc_instance(use_case: dict, solver: str, offer: int, scaling_c
     for item in scaling_components:
         inst += item["inst"]
 
-    Minizinc_instance = Instance(Solver.lookup(solver), Model(f"{init.settings['SAT']['model_path']}/{use_case['model']}.{init.settings['SAT']['model_ext']}"))
+    Minizinc_instance = Instance(Solver.lookup(solver), Model(f"{src.init.settings['SAT']['model_path']}/{use_case['model']}.{src.init.settings['SAT']['model_ext']}"))
 
-    with open(f"{init.settings['SAT']['surrogate_output_path']}/Surrogate.{init.settings['SAT']['surrogate_output_ext']}", "r") as surrogate:
+    with open(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}", "r") as surrogate:
         reader = DictReader(surrogate)
         
         for line in reader:
@@ -66,16 +66,17 @@ def prepare_minizinc_instance(use_case: dict, solver: str, offer: int, scaling_c
             raise Exception("Use-case not found ! ----- " + use_case["name"])
         
     # Settable --- The name of the input DZN file
-    Minizinc_instance.add_file(f"{init.settings['SAT']['input_path']}/{use_case['model']}_Offers{offer}.dzn")
+    Minizinc_instance.add_file(f"{src.init.settings['SAT']['input_path']}/{use_case['model']}_Offers{offer}.dzn")
 
     return Minizinc_instance
    
-def writeOutput(output_path: str, result, name: str, solver: str, offers: int, inst: int = 0, breaker: str = None):
+def writeOutput(output_path: str, form: int, result, name: str, solver: str, offers: int, inst: int = 0, breaker: str = None):
     """
     Creates a CSV file with the results.
 
     Args:
         output_path (str): The path where to place the file
+        form (int): The formalization
         result ([type]): The results of all runtimes
         name (str): The name of the use-case
         solver (str): The keyword of the solver
@@ -83,6 +84,8 @@ def writeOutput(output_path: str, result, name: str, solver: str, offers: int, i
         inst (int, optional): The number of instances for the scaling component. Defaults to 0.
         breaker (int, optional): The symmetry breaker used in testing. Defaults to None
     """
+    output_path = f"{output_path}/Formalization{form}"
+
     if breaker != None:
         create_directory(f"{output_path}/{breaker}")
         output_path = f"{output_path}/{breaker}"
@@ -119,13 +122,13 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
 
     if solver['type'] == 'SAT':
         log("PRE-TESTING", "INFO", "Applying required changes to source...")
-        prepare_model(use_case, init.settings['SAT']['formalization'], breaker, scaling_components)
+        prepare_model(use_case, src.init.settings['SAT']['formalization'], breaker, scaling_components)
 
-        for offer in init.settings['SAT']['offers']:
+        for offer in src.init.settings['SAT']['offers']:
             lastOffer = offer
             results = []
 
-            for i in range(init.settings['Test']['runs']):
+            for i in range(src.init.settings['Test']['runs']):
                 try:
                     log("TESTING", "INFO", "Preparing MiniZinc Instance...")
                     instance = prepare_minizinc_instance(use_case, solver['id'], offer, scaling_components)
@@ -153,34 +156,34 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                     break
             else:
                 if breaker != None:
-                    path = f"{init.settings['Test']['output_path']}/{breaker}"
+                    path = f"{src.init.settings['Test']['output_path']}/{breaker}"
                 else:
-                    path = f"{init.settings['Test']['output_path']}"
+                    path = f"{src.init.settings['Test']['output_path']}"
                 
                 log("TESTING", "INFO", "Writing output...")
-                writeOutput(path, results, use_case['model'], solver['id'], offer, inst)
+                writeOutput(path, src.init.settings['SAT']['formalization'], results, use_case['model'], solver['id'], offer, inst)
 
                 continue
             break
 
     elif solver['type'] == 'SMT':
-        create_directory(f"{init.settings['Test']['output_path']}/SMT2LIB")
+        create_directory(f"{src.init.settings['Test']['output_path']}/SMT2LIB")
 
-        for offer in init.settings['SMT']['offers']:
+        for offer in src.init.settings['SMT']['offers']:
             lastOffer = offer
             results = []
 
             log("PRE-TESTING", "INFO", "Loading SMT Source...")
-            instance = smt.prepareManuverProblem(f"{init.settings['SMT']['model_path']}/{use_case['model']}.{init.settings['SMT']['model_ext']}", 
-                                                 f"{init.settings['SMT']['input_path']}/offers_{offer}.{init.settings['SMT']['input_ext']}", scaling_components)
-            SMTsolver = smt.getSolver(solver['id'], init.settings['SMT']['formalization'])      
+            instance = src.smt.prepareManuverProblem(f"{src.init.settings['SMT']['model_path']}/{use_case['model']}.{src.init.settings['SMT']['model_ext']}", 
+                                                 f"{src.init.settings['SMT']['input_path']}/offers_{offer}.{src.init.settings['SMT']['input_ext']}", scaling_components)
+            SMTsolver = src.smt.getSolver(solver['id'], src.init.settings['SMT']['formalization'])      
 
-            for i in range(init.settings['Test']['runs']):
+            for i in range(src.init.settings['Test']['runs']):
                 log("TESTING", "INFO", "Started test case...")
 
                 getattr(SMTsolver, "init_problem")(instance, "optimize", sb_option=breaker, 
-                                                    smt2lib=f"{init.settings['Test']['output_path']}/SMT2LIB/{use_case['model']}_{inst}_{offer}_{breaker}.smt",
-                                                    cplexLPPath=f"{init.settings['Test']['output_path']}/SMT2LIB/{use_case['model']}_{inst}_{offer}_{breaker}.lp")
+                                                    smt2lib=f"{src.init.settings['Test']['output_path']}/SMT2LIB/{use_case['model']}_{inst}_{offer}_{breaker}.smt",
+                                                    cplexLPPath=f"{src.init.settings['Test']['output_path']}/SMT2LIB/{use_case['model']}_{inst}_{offer}_{breaker}.lp")
                 
                 price, distr, runtime, buf1, buf2 = SMTsolver.run()
 
@@ -199,12 +202,12 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                 results[-1]["Runtime"] = runtime
             else:
                 if breaker != None:
-                    path = f"{init.settings['Test']['output_path']}/{breaker}"
+                    path = f"{src.init.settings['Test']['output_path']}/{breaker}"
                 else:
-                    path = f"{init.settings['Test']['output_path']}"
+                    path = f"{src.init.settings['Test']['output_path']}"
                 
                 log("TESTING", "INFO", "Writing output...")
-                writeOutput(path, results, use_case['model'], solver['id'], offer, inst)
+                writeOutput(path, src.init.settings['SMT']['formalization'], results, use_case['model'], solver['id'], offer, inst)
 
                 continue
             break
@@ -216,12 +219,12 @@ def run_tests():
     
     """
 
-    if init.settings['Test']['symmetry_breakers'] != []:
-        for breaker in init.settings['Test']['symmetry_breakers']:
+    if src.init.settings['Test']['symmetry_breakers'] != []:
+        for breaker in src.init.settings['Test']['symmetry_breakers']:
 
             log("PRE-TESTING", "INFO", f"Using symmetry breaker {breaker}")
 
-            for use_case in init.settings['Use-Cases']:
+            for use_case in src.init.settings['Use-Cases']:
 
                 log("PRE-TESTING", "INFO", "Running tests for " + use_case["name"])
 
@@ -233,21 +236,21 @@ def run_tests():
 
                 if combinations != []:
                     for comb in combinations:
-                        for solver in init.settings['Solvers']:
-                            if solver['id'] in tresholds.keys() and tresholds[solver['id']] == init.settings[solver['type']]['offers'][0]:
+                        for solver in src.init.settings['Solvers']:
+                            if solver['id'] in tresholds.keys() and tresholds[solver['id']] == src.init.settings[solver['type']]['offers'][0]:
                                 break
 
                             lastOffer = run_test(use_case, solver, breaker, comb)
                 
                             tresholds[solver['id']] = lastOffer
                 else:
-                    for solver in init.settings['Solvers']:
+                    for solver in src.init.settings['Solvers']:
                         run_test(use_case, solver, breaker)
 
     else:
         log("PRE-TESTING", "INFO", "Skipping symmetry breakers...")
 
-        for use_case in init.settings['Use-Cases']:
+        for use_case in src.init.settings['Use-Cases']:
 
             log("PRE-TESTING", "INFO", "Running tests for " + use_case["name"])
 
@@ -259,15 +262,15 @@ def run_tests():
 
             if combinations != []:
                 for comb in combinations:
-                    for solver in init.settings['Solvers']:
-                        if solver['id'] in tresholds.keys() and tresholds[solver['id']] == init.settings[solver['type']]['offers'][0]:
+                    for solver in src.init.settings['Solvers']:
+                        if solver['id'] in tresholds.keys() and tresholds[solver['id']] == src.init.settings[solver['type']]['offers'][0]:
                             break
 
                         lastOffer = run_test(use_case, solver, None, comb)
             
                         tresholds[solver['id']] = lastOffer
             else:
-                for solver in init.settings['Solvers']:
+                for solver in src.init.settings['Solvers']:
                     run_test(use_case, solver)
 
                         
@@ -280,11 +283,11 @@ def main() :
         exit(1)
         
     # If set, call the surrogate script
-    if init.settings['SAT']['build_surrogate'] == True:
+    if src.init.settings['SAT']['build_surrogate'] == True:
         try:
             log("PRE-TESTING", "INFO", "Building surrogate file...")
             
-            if exists(f"{init.settings['SAT']['surrogate_output_path']}/Surrogate.{init.settings['SAT']['surrogate_output_ext']}"):
+            if exists(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}"):
                 log("PRE-TESTING", "WARN", "Surrogate output already exists. Rewriting...")
             
             build_surrogate()
@@ -292,7 +295,7 @@ def main() :
         except:
             log("PRE-TESTING", "ERROR", "Error executing surrogate script.")
             exit(1)
-    elif not exists(f"{init.settings['SAT']['surrogate_output_path']}/Surrogate.{init.settings['SAT']['surrogate_output_ext']}"):
+    elif not exists(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}"):
         log("PRE-TESTING", "ERROR", "Surrogate file not found. Please enable surrogate building and retry..")
         exit(1)
     else:

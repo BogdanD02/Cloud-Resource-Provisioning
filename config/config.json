@@ -6,15 +6,15 @@
             "Path": "Models/MiniZinc/",
             "Extension": "mzn",
             
-            "Formalization": 2
+            "Formalization": 1
         },
         {
             "Type": "SMT",
             
-            "Path": "Models/SMT/",
+            "Path": "Models/json/",
             "Extension": "json",
             
-            "Formalization": 2
+            "Formalization": 1
         }
     ],
 
@@ -32,7 +32,7 @@
         {
             "Type": "SMT",
 
-            "Path": "Input/SMT/",
+            "Path": "Input/json/",
             "Extension": "json",
 
             "Offer-Numbers": [
@@ -53,7 +53,7 @@
             "Output-Extension": "csv"
         },
         {
-            "Model-Path": "Surrogate/SMT",
+            "Model-Path": "Surrogate/json",
             "Model-Extension": "json",
             "Type": "SMT",
 

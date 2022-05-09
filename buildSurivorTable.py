@@ -25,13 +25,10 @@ Here are the application settings:
 settings = {
     # General problem settings
     "OffersList" : [20, 40, 250, 500],
-    "SolverList" : ["z3", "cplex", "chuffed"],
+    "SolverList" : ["z3", "cplex", "chuffed", "or-tools", "gecode"],
 
     # Application specific settings
     "UseCaseList" : [
-        "Oryx2",
-        "SecureBilling",
-        "SecureWeb",
         "Wordpress"
     ],
 
@@ -141,23 +138,26 @@ and returns it.
 def build_file_path( problem_name: str, symmetry_breaker: str, solver: str, no_instances: int, no_offers: int,  ):
     if no_instances == 0:
         if os.path.exists("Output/"
+                    + symmetry_breaker + "/"
                     + solver + "/"
                     + problem_name + "_Offers"
                     + str( no_offers ) + ".csv"):
             return ( "Output/"
+                        + symmetry_breaker + "/"
                         + solver + "/"
                         + problem_name + "_Offers"
                         + str( no_offers ) + ".csv" )
 
     if os.path.exists( "Output/"
+                        + symmetry_breaker + "/"
                         + solver + "/"
                         + problem_name + str( no_instances ) + "_Offers"
                         + str( no_offers ) + ".csv"):
-        return ( "Output/"
+        return ( "Output/" + symmetry_breaker + "/"
                             + solver + "/"
                             + problem_name + str( no_instances ) + "_Offers"
                             + str( no_offers ) + ".csv" )
-    return ( "Output/"
+    return ( "Output/" + symmetry_breaker + "/"
                     + solver + "/"
                     + problem_name + str( no_instances ) + "_Offers"
                     + str( no_offers ) + "_" + solver + ".csv" )
@@ -192,6 +192,7 @@ def build_surivor_graph_data( metric: str ):
     print(len(metrics['chuffed']))
 
     for use_case in settings["UseCaseList"]:
+        for symmetry_breaker in settings["SymmetryBreakerList"]:
             for solver in settings["SolverList"]:
                 for no_offers in settings["OffersList"]:
 
@@ -200,7 +201,8 @@ def build_surivor_graph_data( metric: str ):
 
                     if use_case == "Wordpress":
                         for no_inst in range(settings["WordpressMinInstances"], settings["WordpressMaxInstances"] + 1):
-                            path = build_file_path( use_case, 0, solver, no_inst, no_offers )
+                            path = build_file_path( use_case, symmetry_breaker, solver, no_inst, no_offers )
+                            print(path)
 
                             if collect_data_from_csv(path) != 0:
                                 metrics[solver].append(collect_data_from_csv(path))
@@ -362,6 +364,6 @@ def build_solver_graph_data():
 if __name__ == '__main__':
     create_directory("Results")
 
-    #build_surivor_graph_data("Solver")
+    build_surivor_graph_data("Solver")
 
-    build_solver_graph_data()
+    #build_solver_graph_data()

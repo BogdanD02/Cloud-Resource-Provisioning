@@ -1,6 +1,6 @@
 from csv import DictWriter
 from minizinc import Instance, Model, Solver
-import init
+import src.init
 
 """
 The following script runs all the surrogate problems and builds a single csv
@@ -24,7 +24,7 @@ def prepare_surrogate_instance(model: str, scaling_components: list = []):
         model (str): The name of the model
         scaling_components (list, optional): A list containing components and their number of instances. Defaults to [].
     """    
-    Minizinc_instance = Instance(Solver.lookup("gecode"), Model(f"{init.settings['SAT']['surrogate_path']}/{model}.{init.settings['SAT']['surrogate_ext']}"))
+    Minizinc_instance = Instance(Solver.lookup("gecode"), Model(f"{src.init.settings['SAT']['surrogate_path']}/{model}.{src.init.settings['SAT']['surrogate_ext']}"))
 
     for item in scaling_components:
         Minizinc_instance[item["name"]] = item["inst"]
@@ -38,16 +38,16 @@ def build_output(content: list):
     Args:
         content (list): The contents of the csv file
     """
-    with open(f"{init.settings['SAT']['surrogate_output_path']}/Surrogate.{init.settings['SAT']['surrogate_output_ext']}", "w") as outputFile:
+    with open(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}", "w") as outputFile:
         writer = DictWriter(outputFile, ["Name", "Instances", "Estimated VMs"])
         
         writer.writeheader()
         writer.writerows(content)
         
-    if f"{init.settings['SAT']['surrogate_output_path']}/Surrogate.{init.settings['SAT']['surrogate_output_ext']}" != \
-       f"{init.settings['SMT']['surrogate_output_path']}/Surrogate.{init.settings['SMT']['surrogate_output_ext']}":
+    if f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}" != \
+       f"{src.init.settings['SMT']['surrogate_output_path']}/Surrogate.{src.init.settings['SMT']['surrogate_output_ext']}":
 
-        with open(f"{init.settings['SMT']['surrogate_output_path']}/Surrogate.{init.settings['SMT']['surrogate_output_ext']}", "w") as outputFile:
+        with open(f"{src.init.settings['SMT']['surrogate_output_path']}/Surrogate.{src.init.settings['SMT']['surrogate_output_ext']}", "w") as outputFile:
             writer = DictWriter(outputFile, ["Name", "Instances", "Estimated VMs"])
             
             writer.writeheader()
@@ -89,7 +89,7 @@ def build_surrogate():
     
     content = []
     
-    for use_case in init.settings["Use-Cases"]:
+    for use_case in src.init.settings["Use-Cases"]:
         if "surrogate" in use_case.keys():
             if use_case["components"] != []:  
                 scaling_components = build_components(use_case["components"])

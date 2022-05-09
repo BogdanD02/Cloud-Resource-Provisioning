@@ -1,6 +1,6 @@
 from networkx import Graph, find_cliques
-from surrogate import prepare_surrogate_instance
-import init
+from src.surrogate import prepare_surrogate_instance
+import src.init
 
 """
 This script constructs the conflict graph for a specific
@@ -37,7 +37,7 @@ def get_conflicts(model: str):
     """
     listOfConflicts = {}
 
-    with open(f"{init.settings['SAT']['model_path']}/{model}_template.{init.settings['SAT']['model_ext']}", "r") as modelFile:
+    with open(f"{src.init.settings['SAT']['model_path']}/{model}_template.{src.init.settings['SAT']['model_ext']}", "r") as modelFile:
         lines = modelFile.readlines()
 
         for line in lines:

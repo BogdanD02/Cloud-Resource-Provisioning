@@ -3,7 +3,7 @@ from tracemalloc import start
 from networkx import Graph, find_cliques
 from minizinc import Model, Instance, Solver
 from json import load
-import init
+import src.init
 
 """
 This script constructs the conflict graph for a specific
@@ -21,7 +21,7 @@ def solve_surrogate(model: str, comp: str = None, inst: int = None):
         inst (int, optional): The number of instances for the scaling component. Defaults to 0.
     """
 
-    IModel = Model(f"{init.surrogate_path}/{model}_Surrogate.mzn")
+    IModel = Model(f"{src.init.surrogate_path}/{model}_Surrogate.mzn")
     IInst = Instance(Solver.lookup("gecode"), IModel)
 
     if comp != None:
@@ -36,7 +36,7 @@ def get_conflicts(model: str):
     """
     listOfConflicts = {}
 
-    with open(f"{init.model_path}/MiniZinc/{model}_template.mzn", "r") as modelFile:
+    with open(f"{src.init.model_path}/MiniZinc/{model}_template.mzn", "r") as modelFile:
         lines = modelFile.readlines()
 
         for line in lines:

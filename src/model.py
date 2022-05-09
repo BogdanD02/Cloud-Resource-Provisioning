@@ -1,5 +1,5 @@
-from sym_breaker import getSymmetryBreakerConstraints
-import init
+from src.sym_breaker import getSymmetryBreakerConstraints
+import src.init
 
 """
 This script provides a function for altering the template models for SAT-type models.
@@ -131,11 +131,11 @@ def prepare_model(use_case: dict, formalization: int = 1, symmetry_breaker: str 
         symmetry_breaker (str, optional): The desired symmetry breaker(s). Defaults to None.
         scalable_components (list, optional): A list of scalable components and their instances. Defaults to [].
     """
-    with open(f"{init.settings['SAT']['model_path']}/{use_case['model']}_template.{init.settings['SAT']['model_ext']}", "r") as template:
+    with open(f"{src.init.settings['SAT']['model_path']}/{use_case['model']}_template.{src.init.settings['SAT']['model_ext']}", "r") as template:
         ifEncountered = 0
         headerPut = 0
         
-        with open(f"{init.settings['SAT']['model_path']}/{use_case['model']}.{init.settings['SAT']['model_ext']}", "w") as script:
+        with open(f"{src.init.settings['SAT']['model_path']}/{use_case['model']}.{src.init.settings['SAT']['model_ext']}", "w") as script:
             for line in template.readlines():
                 if line.find("if") > -1:
                     ifEncountered = 1

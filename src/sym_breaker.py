@@ -1,6 +1,6 @@
-from conflictGraph import getMaxClique
+from src.conflictGraph import getMaxClique
 from json import load
-import init
+import src.init
 
 """
 This script is used when employing symmetry breaking techniques with SAT Models.
@@ -21,7 +21,7 @@ def addBreakerConstraint(symmetry_breaker: str = None, start: int = 0):
         constraint (str): The constraint to be added to the model.
     """
 
-    with open(f"{init.settings['SAT']['symmetry_breaking_config']}", "r") as file:
+    with open(f"{src.init.settings['SAT']['symmetry_breaking_config']}", "r") as file:
         settings = load(file)
 
     constraint = None

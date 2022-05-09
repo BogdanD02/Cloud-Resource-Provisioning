@@ -14,8 +14,8 @@
  ****      EXTERNAL MODULES     ****
  ****                           ****
  ***********************************/
-include "Modules/Formalization2/GeneralVariables.mzn";
-include "Modules/Formalization2/GeneralConstraints.mzn";
+include "Modules/Formalization1/GeneralVariables.mzn";
+include "Modules/Formalization1/GeneralConstraints.mzn";
 
 
 /***********************************
@@ -23,7 +23,7 @@ include "Modules/Formalization2/GeneralConstraints.mzn";
  ****      INPUT VARIABLES      ****
  ****                           ****
  ***********************************/
-int: WPInstances = 5;
+int: WPInstances = 3;
 
 /***********************************
  ****                           ****
@@ -41,28 +41,33 @@ int: Varnish = 5;
  ****      MODELING PROBLEM     ****
  ****                           ****
  ***********************************/
-constraint basicAllocation(AssignmentMatrix, VM, VMOffers, NoComponents, {DNS_LoadBalancer, HTTP_LoadBalancer});
-constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM, VMOffers);
+constraint basicAllocation(AssignmentMatrix, {DNS_LoadBalancer, HTTP_LoadBalancer}, S, VM);
+constraint occupancy(AssignmentMatrix, OccupancyVector, NoComponents, VM);
+constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM);
+constraint link(VMSpecs, VMPrice, OccupancyVector, VMType, Price, VMOffers, VM);
 
 % Problem specific constraints
-constraint exclusiveDeployment(AssignmentMatrix, VM, VMOffers, {DNS_LoadBalancer, HTTP_LoadBalancer});
+constraint exclusiveDeployment(AssignmentMatrix, VM, DNS_LoadBalancer, HTTP_LoadBalancer);
 
-constraint if(isDeployed(AssignmentMatrix, VM, VMOffers, DNS_LoadBalancer) == 1)
+constraint if(isDeployed(AssignmentMatrix, VM, DNS_LoadBalancer) == 1)
 then 
-requireProvide(AssignmentMatrix, VM, VMOffers, Wordpress, DNS_LoadBalancer, 1, 7)
+    requireProvide(AssignmentMatrix, VM, Wordpress, DNS_LoadBalancer, 1, 7)
+
 else
-requireProvide(AssignmentMatrix, VM, VMOffers, Wordpress, HTTP_LoadBalancer, 1, 3)
+    requireProvide(AssignmentMatrix, VM, Wordpress, HTTP_LoadBalancer, 1, 3)
+
 endif;
 
-constraint requireProvide(AssignmentMatrix, VM, VMOffers, Wordpress, MySQL, 2, 3);
-constraint conflict(AssignmentMatrix, VM, VMOffers, Varnish, {DNS_LoadBalancer, HTTP_LoadBalancer, MySQL});
-constraint conflict(AssignmentMatrix, VM, VMOffers, DNS_LoadBalancer, {Wordpress, MySQL, Varnish});
-constraint conflict(AssignmentMatrix, VM, VMOffers, HTTP_LoadBalancer, {Wordpress, MySQL, Varnish});
+constraint requireProvide(AssignmentMatrix, VM, Wordpress, MySQL, 2, 3);
 
-constraint lowerBound(AssignmentMatrix, VM, VMOffers, {Wordpress}, WPInstances);
-constraint lowerBound(AssignmentMatrix, VM, VMOffers, {Varnish}, 2);
-constraint lowerBound(AssignmentMatrix, VM, VMOffers, {MySQL}, 2);
-constraint upperBound(AssignmentMatrix, VM, VMOffers, {DNS_LoadBalancer}, 1);
+constraint conflict(AssignmentMatrix, {DNS_LoadBalancer, HTTP_LoadBalancer, MySQL}, VM, Varnish);
+constraint conflict(AssignmentMatrix, {Wordpress, MySQL, Varnish}, VM, DNS_LoadBalancer);
+constraint conflict(AssignmentMatrix, {Wordpress, MySQL, Varnish}, VM, HTTP_LoadBalancer);
+
+constraint lowerBound(AssignmentMatrix, VM, Wordpress, WPInstances);
+constraint lowerBound(AssignmentMatrix, VM, Varnish, 2);
+constraint lowerBound(AssignmentMatrix, VM, MySQL, 2);
+constraint upperBound(AssignmentMatrix, VM, DNS_LoadBalancer, 1);
 
 
 /***********************************
@@ -70,9 +75,5 @@ constraint upperBound(AssignmentMatrix, VM, VMOffers, {DNS_LoadBalancer}, 1);
  ****      SOLVING PROBLEM      ****
  ****                           ****
  ***********************************/
-constraint linkedTypes(AssignmentMatrix, VMType, VM, VMOffers, NoComponents);
-constraint linkedPrice(VMType, VMPrice, Price, VM, VMOffers);
-constraint uniqueType(VMType, VM, VMOffers);
-constraint uniqueAlloc(AssignmentMatrix, VM, NoComponents, VMOffers);
 solve minimize sum(k in 1..VM)(Price[k]);
 
