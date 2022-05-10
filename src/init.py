@@ -12,7 +12,7 @@ The script provides functions used in all other scripts.
 For more information regarding the functions, read their documentation.
 """
 
-def parse_config(config_path: str = "config/config.json"):
+def parse_config(config_path: str = "Config/config.json"):
     """
     This function opens the configuration files and extracts all the necessary settings
     for the scripts to run properly.

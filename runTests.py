@@ -275,7 +275,7 @@ def run_tests():
 
                         
 def main() :
-    try:    
+    try:
         log("INIT", "INFO", "Starting script, reading config file")
         parse_config()
     except Exception as e:
