@@ -115,6 +115,11 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
 
     inst = 0
 
+    if breaker:
+        directory = "NoSym"
+    else:
+        directory = breaker
+
     for item in scaling_components:
         inst += item['inst']
 
@@ -155,10 +160,7 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                     print(e)
                     break
             else:
-                if breaker != None:
-                    path = f"{src.init.settings['Test']['output_path']}/{breaker}"
-                else:
-                    path = f"{src.init.settings['Test']['output_path']}"
+                path = f"{src.init.settings['Test']['output_path']}/{directory}"
                 
                 log("TESTING", "INFO", "Writing output...")
                 writeOutput(path, src.init.settings['SAT']['formalization'], results, use_case['model'], solver['id'], offer, inst)
@@ -182,8 +184,8 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                 log("TESTING", "INFO", "Started test case...")
 
                 getattr(SMTsolver, "init_problem")(instance, "optimize", sb_option=breaker, 
-                                                    smt2lib=f"{src.init.settings['Test']['output_path']}/SMT2LIB/{use_case['model']}_{inst}_{offer}_{breaker}.smt",
-                                                    cplexLPPath=f"{src.init.settings['Test']['output_path']}/SMT2LIB/{use_case['model']}_{inst}_{offer}_{breaker}.lp")
+                                                    smt2lib=f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/smt/{use_case['model']}_{inst}_{offer}_{breaker}.smt",
+                                                    cplexLPPath=f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/lp/{use_case['model']}_{inst}_{offer}_{breaker}.lp")
                 
                 price, distr, runtime, buf1, buf2 = SMTsolver.run()
 
@@ -201,10 +203,7 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                 results[-1]["Total Price"] = sum(result['Price'])
                 results[-1]["Runtime"] = runtime
             else:
-                if breaker != None:
-                    path = f"{src.init.settings['Test']['output_path']}/{breaker}"
-                else:
-                    path = f"{src.init.settings['Test']['output_path']}"
+                path = f"{src.init.settings['Test']['output_path']}/{directory}"
                 
                 log("TESTING", "INFO", "Writing output...")
                 writeOutput(path, src.init.settings['SMT']['formalization'], results, use_case['model'], solver['id'], offer, inst)
