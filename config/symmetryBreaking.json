@@ -3,39 +3,39 @@
     "SB-Constraints": [
         {
             "Tag": "L",
-            "Constraint": "Constraint L(AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint L(AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PR",
-            "Constraint": "Constraint PR(Price, VM, [Start]);\n"
+            "Constraint": "constraint PR(Price, VM, [Start]);\n"
         },
         {
             "Tag": "LX",
-            "Constraint": "Constraint LX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint LX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "LPR",
-            "Constraint": "Constraint LPR(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint LPR(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PRL",
-            "Constraint": "Constraint PRL(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint PRL(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "LLX",
-            "Constraint": "Constraint LLX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint LLX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PRLX",
-            "Constraint": "Constraint PRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint PRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "LPRLX",
-            "Constraint": "Constraint LPRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint LPRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PRLLX",
-            "Constraint": "Constraint PRLLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "constraint PRLLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         }
     ]
 }

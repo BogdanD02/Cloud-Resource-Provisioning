@@ -12,8 +12,9 @@
  ****      EXTERNAL MODULES     ****
  ****                           ****
  ***********************************/
-include "Modules/Formalization2/GeneralVariables.mzn";
-include "Modules/Formalization2/GeneralConstraints.mzn";
+include "Modules/Formalization1/SymmetryBreaking.mzn";
+include "Modules/Formalization1/GeneralVariables.mzn";
+include "Modules/Formalization1/GeneralConstraints.mzn";
 
 
 /***********************************
@@ -38,21 +39,24 @@ int: Spark_HistoryService = 10;
  ****      MODELING PROBLEM     ****
  ****                           ****
  ***********************************/
-constraint basicAllocation(AssignmentMatrix, VM, VMOffers, NoComponents, {});
-constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM, VMOffers);
+constraint basicAllocation(AssignmentMatrix, {}, S, VM);
+constraint occupancy(AssignmentMatrix, OccupancyVector, NoComponents, VM);
+constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM);
+constraint link(VMSpecs, VMPrice, OccupancyVector, VMType, Price, VMOffers, VM);
 
 % Problem-specific constraints
-constraint colocation(AssignmentMatrix, VM, VMOffers, {HDFS_DataNode, Spark_Worker, Yarn_NodeManager});
+constraint colocation(AssignmentMatrix, {HDFS_DataNode, Spark_Worker, Yarn_NodeManager}, VM);
 
-constraint conflict(AssignmentMatrix, VM, VMOffers, Kafka, {Zookeeper});
-constraint conflict(AssignmentMatrix, VM, VMOffers, HDFS_NameNode, {HDFS_SecondaryNameNode, Yarn_ResourceManager});
-constraint conflict(AssignmentMatrix, VM, VMOffers, Yarn_ResourceManager, {HDFS_SecondaryNameNode, Yarn_HistoryService});
+constraint conflict(AssignmentMatrix, {Zookeeper}, VM, Kafka);
+constraint conflict(AssignmentMatrix, {HDFS_SecondaryNameNode, Yarn_ResourceManager}, VM, HDFS_NameNode);
+constraint conflict(AssignmentMatrix, {HDFS_SecondaryNameNode, Yarn_HistoryService}, VM, Yarn_ResourceManager);
 
-constraint requireProvide(AssignmentMatrix, VM, VMOffers, Kafka, Zookeeper, 2, 1);
-constraint fullDeployment(AssignmentMatrix, VM, VMOffers, NoComponents, HDFS_DataNode, {});
+constraint requireProvide(AssignmentMatrix, VM, Kafka, Zookeeper, 2, 1);
 
-constraint equalBound(AssignmentMatrix, VM, VMOffers, {Yarn_HistoryService}, 1);
-constraint equalBound(AssignmentMatrix, VM, VMOffers, {Spark_HistoryService}, 1);
+constraint fullDeployment(AssignmentMatrix, {}, VM, NoComponents, HDFS_DataNode);
+
+constraint equalBound(AssignmentMatrix, VM, Yarn_HistoryService, 1);
+constraint equalBound(AssignmentMatrix, VM, Spark_HistoryService, 1);
 
 
 /***********************************
@@ -60,8 +64,14 @@ constraint equalBound(AssignmentMatrix, VM, VMOffers, {Spark_HistoryService}, 1)
  ****      SOLVING PROBLEM      ****
  ****                           ****
  ***********************************/ 
-constraint linkedTypes(AssignmentMatrix, VMType, VM, VMOffers, NoComponents);
-constraint linkedPrice(VMType, VMPrice, Price, VM, VMOffers);
-constraint uniqueType(VMType, VM, VMOffers);
-constraint uniqueAlloc(AssignmentMatrix, VM, NoComponents, VMOffers);
+constraint AssignmentMatrix[Yarn_ResourceManager,1] = 1;
+constraint AssignmentMatrix[HDFS_NameNode, 1] = 0;
+constraint AssignmentMatrix[HDFS_SecondaryNameNode, 1] = 0;
+constraint AssignmentMatrix[HDFS_NameNode,2] = 1;
+constraint AssignmentMatrix[Yarn_ResourceManager, 2] = 0;
+constraint AssignmentMatrix[HDFS_SecondaryNameNode, 2] = 0;
+constraint AssignmentMatrix[HDFS_SecondaryNameNode,3] = 1;
+constraint AssignmentMatrix[Yarn_ResourceManager, 3] = 0;
+constraint AssignmentMatrix[HDFS_NameNode, 3] = 0;
+constraint LX(AssignmentMatrix, NoComponents, VM, 4);
 solve minimize sum(k in 1..VM)(Price[k]);

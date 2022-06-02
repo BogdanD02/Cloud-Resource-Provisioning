@@ -970,8 +970,9 @@
               C4_VM22
               C4_VM23
               C4_VM24
-              C4_VM25))
-      (a!2 (+ 0
+              C4_VM25)))
+  (or (= a!1 0) (>= a!1 1))))
+(assert (let ((a!1 (+ 0
               C3_VM1
               C3_VM2
               C3_VM3
@@ -997,7 +998,60 @@
               C3_VM23
               C3_VM24
               C3_VM25)))
-  (or (and (= a!1 0) (> a!2 0)) (and (> a!1 0) (= a!2 0)))))
+  (or (= a!1 0) (>= a!1 1))))
+(assert (>= (+ 0
+       C4_VM1
+       C4_VM2
+       C4_VM3
+       C4_VM4
+       C4_VM5
+       C4_VM6
+       C4_VM7
+       C4_VM8
+       C4_VM9
+       C4_VM10
+       C4_VM11
+       C4_VM12
+       C4_VM13
+       C4_VM14
+       C4_VM15
+       C4_VM16
+       C4_VM17
+       C4_VM18
+       C4_VM19
+       C4_VM20
+       C4_VM21
+       C4_VM22
+       C4_VM23
+       C4_VM24
+       C4_VM25
+       0
+       C3_VM1
+       C3_VM2
+       C3_VM3
+       C3_VM4
+       C3_VM5
+       C3_VM6
+       C3_VM7
+       C3_VM8
+       C3_VM9
+       C3_VM10
+       C3_VM11
+       C3_VM12
+       C3_VM13
+       C3_VM14
+       C3_VM15
+       C3_VM16
+       C3_VM17
+       C3_VM18
+       C3_VM19
+       C3_VM20
+       C3_VM21
+       C3_VM22
+       C3_VM23
+       C3_VM24
+       C3_VM25)
+    1))
 (assert (<= (+ 0 C3_VM1 C1_VM1) 1))
 (assert (<= (+ 0 C3_VM1 C2_VM1) 1))
 (assert (<= (+ 0 C3_VM1 C5_VM1) 1))

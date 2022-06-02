@@ -12,8 +12,9 @@
  ****      EXTERNAL MODULES     ****
  ****                           ****
  ***********************************/
-include "Modules/Formalization2/GeneralConstraints.mzn";
-include "Modules/Formalization2/GeneralVariables.mzn";
+include "Modules/Formalization1/SymmetryBreaking.mzn";
+include "Modules/Formalization1/GeneralConstraints.mzn";
+include "Modules/Formalization1/GeneralVariables.mzn";
 
 
 /***********************************
@@ -33,15 +34,18 @@ int: LoadBalancer = 5;
  ****      MODELING PROBLEM     ****
  ****                           ****
  ***********************************/
-constraint basicAllocation(AssignmentMatrix, VM, VMOffers, NoComponents, {});
-constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM, VMOffers);
+constraint basicAllocation(AssignmentMatrix, {}, S, VM);
+constraint occupancy(AssignmentMatrix, OccupancyVector, NoComponents, VM);
+constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM);
+constraint link(VMSpecs, VMPrice, OccupancyVector, VMType, Price, VMOffers, VM);
+
 
 % Problem-specific constraints
-constraint equalBound(AssignmentMatrix, VM, VMOffers, {CodingService}, 1);
-constraint equalBound(AssignmentMatrix, VM, VMOffers, {LoadBalancer}, 1);
+constraint equalBound(AssignmentMatrix, VM, CodingService, 1);
+constraint equalBound(AssignmentMatrix, VM, LoadBalancer, 1);
 
-constraint conflict(AssignmentMatrix, VM, VMOffers, CodingService, {SecurityManager, SQLServer, LoadBalancer, Gateway});
-constraint conflict(AssignmentMatrix, VM, VMOffers, LoadBalancer, {Gateway, SQLServer});
+constraint conflict(AssignmentMatrix, {SecurityManager, SQLServer, LoadBalancer, Gateway}, VM, CodingService);
+constraint conflict(AssignmentMatrix, {Gateway, SQLServer}, VM, LoadBalancer);
 
 
 /***********************************
@@ -49,8 +53,14 @@ constraint conflict(AssignmentMatrix, VM, VMOffers, LoadBalancer, {Gateway, SQLS
  ****      SOLVING PROBLEM      ****
  ****                           ****
  ***********************************/
-constraint linkedTypes(AssignmentMatrix, VMType, VM, VMOffers, NoComponents);
-constraint linkedPrice(VMType, VMPrice, Price, VM, VMOffers);
-constraint uniqueType(VMType, VM, VMOffers);
-constraint uniqueAlloc(AssignmentMatrix, VM, NoComponents, VMOffers);
+constraint AssignmentMatrix[CodingService,1] = 1;
+constraint AssignmentMatrix[LoadBalancer, 1] = 0;
+constraint AssignmentMatrix[SQLServer, 1] = 0;
+constraint AssignmentMatrix[LoadBalancer,2] = 1;
+constraint AssignmentMatrix[CodingService, 2] = 0;
+constraint AssignmentMatrix[SQLServer, 2] = 0;
+constraint AssignmentMatrix[SQLServer,3] = 1;
+constraint AssignmentMatrix[CodingService, 3] = 0;
+constraint AssignmentMatrix[LoadBalancer, 3] = 0;
+constraint LX(AssignmentMatrix, NoComponents, VM, 4);
 solve minimize sum(k in 1..VM)(Price[k]);

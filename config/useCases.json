@@ -9,7 +9,7 @@
             "Components": [
                 {
                     "Name": "WPInstances",
-                    "Lower-Bound": 3,
+                    "Lower-Bound": 4,
                     "Upper-Bound": 12
                 }
             ],

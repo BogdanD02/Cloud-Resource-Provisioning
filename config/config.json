@@ -3,7 +3,7 @@
         {
             "Type": "SAT",
 
-            "Path": "Models/MiniZinc/",
+            "Path": "Models/MiniZinc",
             "Extension": "mzn",
             
             "Formalization": 1
@@ -11,7 +11,7 @@
         {
             "Type": "SMT",
             
-            "Path": "Models/json/",
+            "Path": "Models/json",
             "Extension": "json",
             
             "Formalization": 1
@@ -22,7 +22,7 @@
         {
             "Type": "SAT",
 
-            "Path": "Data/MiniZinc/",
+            "Path": "Data/MiniZinc",
             "Extension": "dzn",
 
             "Offer-Numbers": [
@@ -32,7 +32,7 @@
         {
             "Type": "SMT",
 
-            "Path": "Data/json/",
+            "Path": "Data/json",
             "Extension": "json",
 
             "Offer-Numbers": [
@@ -59,7 +59,7 @@
 
             "Enabled": true,
 
-            "Output-Path": "Data/",
+            "Output-Path": "Data",
             "Output-Extension": "csv"
         }
     ],
@@ -67,7 +67,7 @@
     "Test-Config": {
         "Repetitions": 3,
 
-        "Symmetry-Breaking": false,
+        "Symmetry-Breaking": true,
         "Symmetry-Breaker-List": [
             "FV", "PR", "L", "LX",
             "FVPR", "FVL", "FVLX", "PRL", "PRLX", "LPR", "LLX",
@@ -75,7 +75,7 @@
             "FVPRLLX", "FVLPRLX"
         ],
 
-        "Output-Path": "Output/",
+        "Output-Path": "Output",
         
         "Solver-Config-File": "Config/solvers.json",
         "Use-Case-Config-File": "Config/useCases.json",

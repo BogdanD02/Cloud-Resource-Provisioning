@@ -1,3 +1,4 @@
+from venv import create
 from src.model import prepare_model
 from minizinc import Instance, Model, Solver
 from csv import DictReader, DictWriter
@@ -86,9 +87,14 @@ def writeOutput(output_path: str, form: int, result, name: str, solver: str, off
     """
     output_path = f"{output_path}/Formalization{form}"
 
+    create_directory(output_path)
+
     if breaker != None:
         create_directory(f"{output_path}/{breaker}")
         output_path = f"{output_path}/{breaker}"
+    else:
+        create_directory(f"{output_path}/NoSym")
+        output_path = f"{output_path}/NoSym"
     create_directory(f"{output_path}/{solver}")
 
     if inst == 0:
@@ -114,11 +120,6 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
     """
 
     inst = 0
-
-    if breaker:
-        directory = "NoSym"
-    else:
-        directory = breaker
 
     for item in scaling_components:
         inst += item['inst']
@@ -160,16 +161,17 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                     print(e)
                     break
             else:
-                path = f"{src.init.settings['Test']['output_path']}/{directory}"
+                path = f"{src.init.settings['Test']['output_path']}"
                 
                 log("TESTING", "INFO", "Writing output...")
-                writeOutput(path, src.init.settings['SAT']['formalization'], results, use_case['model'], solver['id'], offer, inst)
+                writeOutput(path, src.init.settings['SAT']['formalization'], results, use_case['model'], solver['id'], offer, inst, breaker)
 
                 continue
             break
 
     elif solver['type'] == 'SMT':
-        create_directory(f"{src.init.settings['Test']['output_path']}/SMT2LIB")
+        create_directory(f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/smt")
+        create_directory(f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/lp")
 
         for offer in src.init.settings['SMT']['offers']:
             lastOffer = offer
@@ -203,10 +205,10 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                 results[-1]["Total Price"] = sum(result['Price'])
                 results[-1]["Runtime"] = runtime
             else:
-                path = f"{src.init.settings['Test']['output_path']}/{directory}"
+                path = f"{src.init.settings['Test']['output_path']}"
                 
                 log("TESTING", "INFO", "Writing output...")
-                writeOutput(path, src.init.settings['SMT']['formalization'], results, use_case['model'], solver['id'], offer, inst)
+                writeOutput(path, src.init.settings['SMT']['formalization'], results, use_case['model'], solver['id'], offer, inst, breaker)
 
                 continue
             break
@@ -217,6 +219,7 @@ def run_tests():
     Goes through all use-cases and tests each of them via the run_test() function.
     
     """
+    create_directory(f"{src.init.settings['Test']['output_path']}")
 
     if src.init.settings['Test']['symmetry_breakers'] != []:
         for breaker in src.init.settings['Test']['symmetry_breakers']:

@@ -230,9 +230,29 @@
   (or (= a!1 0)
       (<= (* 2 (+ 0 C1_VM1 C1_VM2 C1_VM3 C1_VM4 C1_VM5 C1_VM6 C1_VM7 C1_VM8))
           (* 3 a!1)))))
-(assert (let ((a!1 (+ 0 C4_VM1 C4_VM2 C4_VM3 C4_VM4 C4_VM5 C4_VM6 C4_VM7 C4_VM8))
-      (a!2 (+ 0 C3_VM1 C3_VM2 C3_VM3 C3_VM4 C3_VM5 C3_VM6 C3_VM7 C3_VM8)))
-  (or (and (= a!1 0) (> a!2 0)) (and (> a!1 0) (= a!2 0)))))
+(assert (let ((a!1 (+ 0 C4_VM1 C4_VM2 C4_VM3 C4_VM4 C4_VM5 C4_VM6 C4_VM7 C4_VM8)))
+  (or (= a!1 0) (>= a!1 1))))
+(assert (let ((a!1 (+ 0 C3_VM1 C3_VM2 C3_VM3 C3_VM4 C3_VM5 C3_VM6 C3_VM7 C3_VM8)))
+  (or (= a!1 0) (>= a!1 1))))
+(assert (>= (+ 0
+       C4_VM1
+       C4_VM2
+       C4_VM3
+       C4_VM4
+       C4_VM5
+       C4_VM6
+       C4_VM7
+       C4_VM8
+       0
+       C3_VM1
+       C3_VM2
+       C3_VM3
+       C3_VM4
+       C3_VM5
+       C3_VM6
+       C3_VM7
+       C3_VM8)
+    1))
 (assert (<= (+ 0 C3_VM1 C1_VM1) 1))
 (assert (<= (+ 0 C3_VM1 C2_VM1) 1))
 (assert (<= (+ 0 C3_VM1 C5_VM1) 1))

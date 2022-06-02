@@ -37,7 +37,7 @@ constraint basicAllocation(AssignmentMatrix, {}, S, VM);
 constraint occupancy(AssignmentMatrix, OccupancyVector, NoComponents, VM);
 constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM);
 constraint link(VMSpecs, VMPrice, OccupancyVector, VMType, Price, VMOffers, VM);
-constraint nullType(AssignmentMatrix, VMType, NoComponents, VM);
+
 
 % Problem-specific constraints
 constraint equalBound(AssignmentMatrix, VM, CodingService, 1);

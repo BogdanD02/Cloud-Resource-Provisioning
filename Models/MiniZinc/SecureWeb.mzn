@@ -12,8 +12,9 @@
  ****      EXTERNAL MODULES     ****
  ****                           ****
  ***********************************/
-include "Modules/Formalization2/GeneralVariables.mzn";
-include "Modules/Formalization2/GeneralConstraints.mzn";
+include "Modules/Formalization1/SymmetryBreaking.mzn";
+include "Modules/Formalization1/GeneralVariables.mzn";
+include "Modules/Formalization1/GeneralConstraints.mzn";
 
 
 /***********************************
@@ -37,20 +38,23 @@ int: IDSAgent = 5;
 % From the problem description, you can have 0 instances of Apache or Ngnix (but not both simulaneously) as the constraint
 % refers to the total number of instances (Apache and Ngnix combined), but we left it here so
 % the implementation is similar with the one used in SMT Test cases.
-constraint basicAllocation(AssignmentMatrix, VM, VMOffers, NoComponents, {});
+constraint basicAllocation(AssignmentMatrix, {}, S, VM);
 
-constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM, VMOffers);
+constraint occupancy(AssignmentMatrix, OccupancyVector, NoComponents, VM);
+constraint capacity(AssignmentMatrix, CompREQ, VMSpecs, VMType, HardwareREQ, NoComponents, VM);
+constraint link(VMSpecs, VMPrice, OccupancyVector, VMType, Price, VMOffers, VM);
 
 % Problem-specific constraints
-constraint equalBound(AssignmentMatrix, VM, VMOffers, {Balancer}, 1);
-constraint lowerBound(AssignmentMatrix, VM, VMOffers, {Apache, Ngnix}, 3);
+constraint equalBound(AssignmentMatrix, VM, Balancer, 1);
+constraint lowerBound(AssignmentMatrix, VM, Apache, Ngnix, 3);
 
-constraint conflict(AssignmentMatrix, VM, VMOffers, Balancer, {Apache, Ngnix, IDSServer, IDSAgent});
-constraint conflict(AssignmentMatrix, VM, VMOffers, IDSServer, {Balancer, Apache, Ngnix, IDSAgent});
-constraint conflict(AssignmentMatrix, VM, VMOffers, Apache, {Ngnix});
+constraint conflict(AssignmentMatrix, {Apache, Ngnix, IDSServer, IDSAgent}, VM, Balancer);
+constraint conflict(AssignmentMatrix, {Balancer, Apache, Ngnix, IDSAgent}, VM, IDSServer);
+constraint conflict(AssignmentMatrix, {Ngnix}, VM, Apache);
 
+constraint boundedRequireProvide(AssignmentMatrix, VM, IDSServer, IDSAgent, 10);
 
-constraint fullDeployment(AssignmentMatrix, VM, VMOffers, NoComponents, IDSAgent, {Balancer, IDSServer});
+constraint fullDeployment(AssignmentMatrix, {Balancer, IDSServer}, VM, NoComponents, IDSAgent);
 
 
 /***********************************
@@ -58,8 +62,25 @@ constraint fullDeployment(AssignmentMatrix, VM, VMOffers, NoComponents, IDSAgent
  ****      SOLVING PROBLEM      ****
  ****                           ****
  ***********************************/
-constraint linkedTypes(AssignmentMatrix, VMType, VM, VMOffers, NoComponents);
-constraint linkedPrice(VMType, VMPrice, Price, VM, VMOffers);
-constraint uniqueType(VMType, VM, VMOffers);
-constraint uniqueAlloc(AssignmentMatrix, VM, NoComponents, VMOffers);
+constraint AssignmentMatrix[Balancer,1] = 1;
+constraint AssignmentMatrix[IDSServer, 1] = 0;
+constraint AssignmentMatrix[Apache, 1] = 0;
+constraint AssignmentMatrix[Ngnix, 1] = 0;
+constraint AssignmentMatrix[IDSServer,2] = 1;
+constraint AssignmentMatrix[Balancer, 2] = 0;
+constraint AssignmentMatrix[Apache, 2] = 0;
+constraint AssignmentMatrix[Ngnix, 2] = 0;
+constraint AssignmentMatrix[Apache,3] = 1;
+constraint AssignmentMatrix[Balancer, 3] = 0;
+constraint AssignmentMatrix[IDSServer, 3] = 0;
+constraint AssignmentMatrix[Ngnix, 3] = 0;
+constraint AssignmentMatrix[Ngnix,4] = 1;
+constraint AssignmentMatrix[Ngnix,5] = 1;
+constraint AssignmentMatrix[Balancer, 4] = 0;
+constraint AssignmentMatrix[IDSServer, 4] = 0;
+constraint AssignmentMatrix[Apache, 4] = 0;
+constraint AssignmentMatrix[Balancer, 5] = 0;
+constraint AssignmentMatrix[IDSServer, 5] = 0;
+constraint AssignmentMatrix[Apache, 5] = 0;
+constraint LX(AssignmentMatrix, NoComponents, VM, 6);
 solve minimize sum(k in 1..VM)(Price[k]);

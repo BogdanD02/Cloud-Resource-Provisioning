@@ -1,4 +1,3 @@
-VM=8;
 % number of components
 NoComponents = 5;
 % number of hardware requirements
