@@ -11,9 +11,12 @@ def import_settings():
     """
     Imports the original settings
     """
-    global original
+    global original, configPath
     
-    with open("config/config.json", "r") as f:
+    with open("Config/config.json", "r") as f:
+        configPath = load(f)["Use-Case-Config-File"]
+        
+    with open(configPath, "r") as f:
         original = load(f)
         
 def update():
@@ -23,7 +26,7 @@ def update():
     global original
     
     with open("config/config.json", "w") as f:
-        dump(original, f)
+        dump(configPath, f)
 
 if __name__ == '__main__':
     import_settings()

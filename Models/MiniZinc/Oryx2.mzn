@@ -12,7 +12,6 @@
  ****      EXTERNAL MODULES     ****
  ****                           ****
  ***********************************/
-include "Modules/Formalization1/SymmetryBreaking.mzn";
 include "Modules/Formalization1/GeneralVariables.mzn";
 include "Modules/Formalization1/GeneralConstraints.mzn";
 
@@ -64,14 +63,4 @@ constraint equalBound(AssignmentMatrix, VM, Spark_HistoryService, 1);
  ****      SOLVING PROBLEM      ****
  ****                           ****
  ***********************************/ 
-constraint AssignmentMatrix[Yarn_ResourceManager,1] = 1;
-constraint AssignmentMatrix[HDFS_NameNode, 1] = 0;
-constraint AssignmentMatrix[HDFS_SecondaryNameNode, 1] = 0;
-constraint AssignmentMatrix[HDFS_NameNode,2] = 1;
-constraint AssignmentMatrix[Yarn_ResourceManager, 2] = 0;
-constraint AssignmentMatrix[HDFS_SecondaryNameNode, 2] = 0;
-constraint AssignmentMatrix[HDFS_SecondaryNameNode,3] = 1;
-constraint AssignmentMatrix[Yarn_ResourceManager, 3] = 0;
-constraint AssignmentMatrix[HDFS_NameNode, 3] = 0;
-constraint LX(AssignmentMatrix, NoComponents, VM, 4);
 solve minimize sum(k in 1..VM)(Price[k]);

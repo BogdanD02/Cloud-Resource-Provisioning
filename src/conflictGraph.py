@@ -37,7 +37,7 @@ def get_conflicts(model: str):
     """
     listOfConflicts = {}
 
-    with open(f"{src.init.settings['SAT']['model_path']}/{model}_template.{src.init.settings['SAT']['model_ext']}", "r") as modelFile:
+    with open(f"{src.init.settings['MiniZinc']['model_path']}/{model}_template.{src.init.settings['MiniZinc']['model_ext']}", "r") as modelFile:
         lines = modelFile.readlines()
 
         for line in lines:

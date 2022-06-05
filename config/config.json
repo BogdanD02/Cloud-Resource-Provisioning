@@ -1,7 +1,7 @@
 {   
     "Source-Config": [
         {
-            "Type": "SAT",
+            "Type": "MiniZinc",
 
             "Path": "Models/MiniZinc",
             "Extension": "mzn",
@@ -9,7 +9,7 @@
             "Formalization": 1
         },
         {
-            "Type": "SMT",
+            "Type": "JSON",
             
             "Path": "Models/json",
             "Extension": "json",
@@ -20,7 +20,7 @@
 
     "Input-Config": [
         {
-            "Type": "SAT",
+            "Type": "MiniZinc",
 
             "Path": "Data/MiniZinc",
             "Extension": "dzn",
@@ -30,7 +30,7 @@
             ]
         },
         {
-            "Type": "SMT",
+            "Type": "JSON",
 
             "Path": "Data/json",
             "Extension": "json",
@@ -43,7 +43,7 @@
 
     "Surrogate-Config": [
         {
-            "Type": "SAT",
+            "Type": "MiniZinc",
         
             "Model-Path": "Models/Surrogate/MiniZinc",
             "Model-Extension": "mzn",
@@ -55,7 +55,7 @@
         {
             "Model-Path": "Models/Surrogate/json",
             "Model-Extension": "json",
-            "Type": "SMT",
+            "Type": "JSON",
 
             "Enabled": true,
 
@@ -67,7 +67,7 @@
     "Test-Config": {
         "Repetitions": 3,
 
-        "Symmetry-Breaking": true,
+        "Symmetry-Breaking": false,
         "Symmetry-Breaker-List": [
             "FV", "PR", "L", "LX",
             "FVPR", "FVL", "FVLX", "PRL", "PRLX", "LPR", "LLX",
@@ -79,6 +79,6 @@
         
         "Solver-Config-File": "Config/solvers.json",
         "Use-Case-Config-File": "Config/useCases.json",
-        "SAT-SB-File": "Config/symmetryBreaking.json"
+        "MiniZinc-SB-File": "Config/symmetryBreaking.json"
     }
 }

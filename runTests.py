@@ -54,9 +54,9 @@ def prepare_minizinc_instance(use_case: dict, solver: str, offer: int, scaling_c
     for item in scaling_components:
         inst += item["inst"]
 
-    Minizinc_instance = Instance(Solver.lookup(solver), Model(f"{src.init.settings['SAT']['model_path']}/{use_case['model']}.{src.init.settings['SAT']['model_ext']}"))
+    Minizinc_instance = Instance(Solver.lookup(solver), Model(f"{src.init.settings['MiniZinc']['model_path']}/{use_case['model']}.{src.init.settings['MiniZinc']['model_ext']}"))
 
-    with open(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}", "r") as surrogate:
+    with open(f"{src.init.settings['MiniZinc']['surrogate_output_path']}/Surrogate.{src.init.settings['MiniZinc']['surrogate_output_ext']}", "r") as surrogate:
         reader = DictReader(surrogate)
         
         for line in reader:
@@ -67,7 +67,7 @@ def prepare_minizinc_instance(use_case: dict, solver: str, offer: int, scaling_c
             raise Exception("Use-case not found ! ----- " + use_case["name"])
         
     # Settable --- The name of the input DZN file
-    Minizinc_instance.add_file(f"{src.init.settings['SAT']['input_path']}/{use_case['model']}_Offers{offer}.dzn")
+    Minizinc_instance.add_file(f"{src.init.settings['MiniZinc']['input_path']}/{use_case['model']}_Offers{offer}.dzn")
 
     return Minizinc_instance
    
@@ -126,11 +126,11 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
 
     log("PRE-TESTING", "INFO", f"Testing with {solver['name']}")
 
-    if solver['type'] == 'SAT':
+    if solver['type'] == 'MiniZinc':
         log("PRE-TESTING", "INFO", "Applying required changes to source...")
-        prepare_model(use_case, src.init.settings['SAT']['formalization'], breaker, scaling_components)
+        prepare_model(use_case, src.init.settings['MiniZinc']['formalization'], breaker, scaling_components)
 
-        for offer in src.init.settings['SAT']['offers']:
+        for offer in src.init.settings['MiniZinc']['offers']:
             lastOffer = offer
             results = []
 
@@ -164,30 +164,30 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                 path = f"{src.init.settings['Test']['output_path']}"
                 
                 log("TESTING", "INFO", "Writing output...")
-                writeOutput(path, src.init.settings['SAT']['formalization'], results, use_case['model'], solver['id'], offer, inst, breaker)
+                writeOutput(path, src.init.settings['MiniZinc']['formalization'], results, use_case['model'], solver['id'], offer, inst, breaker)
 
                 continue
             break
 
-    elif solver['type'] == 'SMT':
-        create_directory(f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/smt")
-        create_directory(f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/lp")
+    elif solver['type'] == 'JSON':
+        create_directory(f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['JSON']['formalization']}/smt")
+        create_directory(f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['JSON']['formalization']}/lp")
 
-        for offer in src.init.settings['SMT']['offers']:
+        for offer in src.init.settings['JSON']['offers']:
             lastOffer = offer
             results = []
 
-            log("PRE-TESTING", "INFO", "Loading SMT Source...")
-            instance = src.smt.prepareManuverProblem(f"{src.init.settings['SMT']['model_path']}/{use_case['model']}.{src.init.settings['SMT']['model_ext']}", 
-                                                 f"{src.init.settings['SMT']['input_path']}/offers_{offer}.{src.init.settings['SMT']['input_ext']}", scaling_components)
-            SMTsolver = src.smt.getSolver(solver['id'], src.init.settings['SMT']['formalization'])      
+            log("PRE-TESTING", "INFO", "Loading JSON Source...")
+            instance = src.smt.prepareManuverProblem(f"{src.init.settings['JSON']['model_path']}/{use_case['model']}.{src.init.settings['JSON']['model_ext']}", 
+                                                 f"{src.init.settings['JSON']['input_path']}/offers_{offer}.{src.init.settings['JSON']['input_ext']}", scaling_components)
+            SMTsolver = src.smt.getSolver(solver['id'], src.init.settings['JSON']['formalization'])      
 
             for i in range(src.init.settings['Test']['runs']):
                 log("TESTING", "INFO", "Started test case...")
 
                 getattr(SMTsolver, "init_problem")(instance, "optimize", sb_option=breaker, 
-                                                    smt2lib=f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/smt/{use_case['model']}_{inst}_{offer}_{breaker}.smt",
-                                                    cplexLPPath=f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['SMT']['formalization']}/lp/{use_case['model']}_{inst}_{offer}_{breaker}.lp")
+                                                    smt2lib=f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['JSON']['formalization']}/smt/{use_case['model']}_{inst}_{offer}_{breaker}.smt",
+                                                    cplexLPPath=f"{src.init.settings['Test']['output_path']}/Formalization{src.init.settings['JSON']['formalization']}/lp/{use_case['model']}_{inst}_{offer}_{breaker}.lp")
                 
                 price, distr, runtime, buf1, buf2 = SMTsolver.run()
 
@@ -208,7 +208,7 @@ def run_test(use_case: dict, solver: dict, breaker: str = None, scaling_componen
                 path = f"{src.init.settings['Test']['output_path']}"
                 
                 log("TESTING", "INFO", "Writing output...")
-                writeOutput(path, src.init.settings['SMT']['formalization'], results, use_case['model'], solver['id'], offer, inst, breaker)
+                writeOutput(path, src.init.settings['JSON']['formalization'], results, use_case['model'], solver['id'], offer, inst, breaker)
 
                 continue
             break
@@ -285,11 +285,11 @@ def main() :
         exit(1)
         
     # If set, call the surrogate script
-    if src.init.settings['SAT']['build_surrogate'] == True:
+    if src.init.settings['MiniZinc']['build_surrogate'] == True:
         try:
             log("PRE-TESTING", "INFO", "Building surrogate file...")
             
-            if exists(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}"):
+            if exists(f"{src.init.settings['MiniZinc']['surrogate_output_path']}/Surrogate.{src.init.settings['MiniZinc']['surrogate_output_ext']}"):
                 log("PRE-TESTING", "WARN", "Surrogate output already exists. Rewriting...")
             
             build_surrogate()
@@ -297,7 +297,7 @@ def main() :
         except:
             log("PRE-TESTING", "ERROR", "Error executing surrogate script.")
             exit(1)
-    elif not exists(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}"):
+    elif not exists(f"{src.init.settings['MiniZinc']['surrogate_output_path']}/Surrogate.{src.init.settings['MiniZinc']['surrogate_output_ext']}"):
         log("PRE-TESTING", "ERROR", "Surrogate file not found. Please enable surrogate building and retry..")
         exit(1)
     else:

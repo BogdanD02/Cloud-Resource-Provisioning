@@ -3,7 +3,7 @@ from json import load
 import src.init
 
 """
-This script is used when employing symmetry breaking techniques with SAT Models.
+This script is used when employing symmetry breaking techniques with MiniZinc Models.
 
 The script generates the required constraints which are to be added for the respective
 symmetry breaker.
@@ -21,7 +21,7 @@ def addBreakerConstraint(symmetry_breaker: str = None, start: int = 0):
         constraint (str): The constraint to be added to the model.
     """
 
-    with open(f"{src.init.settings['SAT']['symmetry_breaking_config']}", "r") as file:
+    with open(f"{src.init.settings['MiniZinc']['symmetry_breaking_config']}", "r") as file:
         settings = load(file)
 
     constraint = None

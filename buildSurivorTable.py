@@ -24,8 +24,8 @@ Here are the application settings:
 """
 settings = {
     # General problem settings
-    "OffersList" : [20, 40, 250, 500],
-    "SolverList" : ["z3", "cplex", "chuffed", "or-tools", "gecode"],
+    "OffersList" : [20],
+    "SolverList" : ["or-tools"],
 
     # Application specific settings
     "UseCaseList" : [
@@ -36,7 +36,7 @@ settings = {
         "FV", "PR", "L", "LX",
         "FVPR", "FVL", "FVLX", "PRL", "PRLX", "LPR", "LLX",
         "FVPRL", "FVPRLX", "FVLPR", "FVLLX", "PRLLX", "LPRLX",
-        "FVPRLLX", "FVLPRLX"
+        "FVPRLLX", "FVLPRLX", "NoSym"
     ],
 
     "CsvHeaders" : [
@@ -136,31 +136,35 @@ and returns it.
 @returns    The path created by the formula above.
 """    
 def build_file_path( problem_name: str, symmetry_breaker: str, solver: str, no_instances: int, no_offers: int,  ):
-    if no_instances == 0:
-        if os.path.exists("Output/"
-                    + symmetry_breaker + "/"
-                    + solver + "/"
-                    + problem_name + "_Offers"
-                    + str( no_offers ) + ".csv"):
-            return ( "Output/"
+    try:
+        if no_instances == 0:
+            if os.path.exists("Output/Formalization1/csv/"
                         + symmetry_breaker + "/"
                         + solver + "/"
                         + problem_name + "_Offers"
-                        + str( no_offers ) + ".csv" )
-
-    if os.path.exists( "Output/"
-                        + symmetry_breaker + "/"
-                        + solver + "/"
-                        + problem_name + str( no_instances ) + "_Offers"
                         + str( no_offers ) + ".csv"):
-        return ( "Output/" + symmetry_breaker + "/"
+                return ( "Output/Formalization1/csv/"
+                            + symmetry_breaker + "/"
+                            + solver + "/"
+                            + problem_name + "_Offers"
+                            + str( no_offers ) + ".csv" )
+
+        if os.path.exists( "Output/Formalization1/csv/"
+                            + symmetry_breaker + "/"
                             + solver + "/"
                             + problem_name + str( no_instances ) + "_Offers"
-                            + str( no_offers ) + ".csv" )
-    return ( "Output/" + symmetry_breaker + "/"
-                    + solver + "/"
-                    + problem_name + str( no_instances ) + "_Offers"
-                    + str( no_offers ) + "_" + solver + ".csv" )
+                            + str( no_offers ) + ".csv"):
+            return ( "Output/Formalization1/csv/" + symmetry_breaker + "/"
+                                + solver + "/"
+                                + problem_name + str( no_instances ) + "_Offers"
+                                + str( no_offers ) + ".csv" )
+        return ( "Output/Formalization1/csv/" + symmetry_breaker + "/"
+                        + solver + "/"
+                        + problem_name + str( no_instances ) + "_Offers"
+                        + str( no_offers ) + "_" + solver + ".csv" )
+    except Exception as e:
+        print(problem_name, symmetry_breaker, solver, no_instances, no_offers)
+        exit(1)
 
 """
 This function builds an empty dictionary
@@ -202,12 +206,12 @@ def build_surivor_graph_data( metric: str ):
                     if use_case == "Wordpress":
                         for no_inst in range(settings["WordpressMinInstances"], settings["WordpressMaxInstances"] + 1):
                             path = build_file_path( use_case, symmetry_breaker, solver, no_inst, no_offers )
-                            print(path)
+                            #print(path)
 
                             if collect_data_from_csv(path) != 0:
                                 metrics[solver].append(collect_data_from_csv(path))
                     else:
-                        path = build_file_path( use_case, 0, solver, 0, no_offers )
+                        path = build_file_path( use_case, symmetry_breaker, solver, 0, no_offers )
 
                         if collect_data_from_csv(path) != 0:
                             metrics[solver].append( collect_data_from_csv(path) )
@@ -298,9 +302,6 @@ def build_solver_graph_data():
                     else:
                         path = build_file_path( use_case, sym_breaker, solver, 0, no_offers )
 
-                        if solver == "chuffed":
-                            print(path)
-
                         if collect_data_from_csv(path) != 0:
                             metrics[sym_breaker].append( collect_data_from_csv(path) )
 
@@ -335,7 +336,7 @@ def build_solver_graph_data():
             metrics[key][i] += metrics[key][i-1]
 
     # Writing the final csv file
-    with open(settings["Output_Directory"] + "/symmetry" + "_survivor.csv", "w") as file:
+    with open(settings["Output_Directory"] + "/Best_SB_" + settings["SolverList"][0] + "_" + settings["UseCaseList"][0] + str(settings["OffersList"][0]) + ".csv", "w") as file:
         for i in range(no_entries):
             file.write(str(i))
 
@@ -364,6 +365,5 @@ def build_solver_graph_data():
 if __name__ == '__main__':
     create_directory("Results")
 
-    build_surivor_graph_data("Solver")
-
-    #build_solver_graph_data()
+   #build_surivor_graph_data("Solver")
+    build_solver_graph_data()

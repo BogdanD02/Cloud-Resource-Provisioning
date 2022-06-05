@@ -1,6 +1,7 @@
 # Automated cloud deployment
 
-This tool was made for running use-cases with different solvers and configurations automatically.
+The tool is used to determine a deployment plan for a series of application using a given amount of Virtual Machine (VM) offers
+at its disposal. It was designed to be highly configurable and easy to use.
 
 ## Setup
 
@@ -22,8 +23,28 @@ Furthermore, you need the Minzinc and CPLEX applications installed as their bina
 
 To install them, please use the following links:
 
-- Minizinc []
-- CPLEX []
+- Minizinc [https://www.minizinc.org/]
+- CPLEX [https://www.ibm.com/support/pages/downloading-ibm-ilog-cplex-optimization-studio-v1290]
+- Google OR-Tools [https://developers.google.com/optimization/install/download]
+
+## Creating your own use-case
+
+Although the tool comes with some model use-cases, you can also add your own by following these steps:
+
+1. Decide the format of the model (MiniZinc / JSON / Both)
+2. Create the model of the application (see guide below)
+3. (Optional) For MiniZinc models, create a surrogate model so the script can compute the maximum number of VMs to be used.
+4. Run the script *add_useCase.py* which will configure the application for your newly created model
+5. (Optional) provide a list of Virtual Machine offers, following the same format as those provided as model
+    Note that the offer list must be in the same format as that of the model.
+
+## Running the tool
+
+There are two simple steps in running the tool:
+
+1. Select the configuration you would like to run with (see the configuration options below)
+ - **NOTE** Make sure to disable the solvers that aren't compatible with the format of your sources.
+2. Run the script *runTests.py*
 
 ## Configuration
 
@@ -98,12 +119,3 @@ This file stores information about each use case.
     - **Upper Bound** : The maximum amount instances to be deployed
   - **Surrogate-Problem** : Denotes whether the model has an associated surrogate problem which must be run first
   - **Surrogate-Model-Name** : The name of the model for the surrogate problem
-
-## Running the tests
-
-There are two simple steps in running the tests with this tool:
-
-1. Select the configuration you would like to run with
-2. Run the script *runTests.py*
-
-If you want more information about configuring the tool, please look above where all config options are explained.

@@ -37,14 +37,14 @@ def prepareManuverProblem(problem_file_name, configurations_file_name, scaling_c
 def getSolver(solver, formalization: int = 1):
     if formalization == 1:
         if solver == "z3":
-            from smtSolvers.SMT_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
+            from smtSolvers.JSON_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
             return Z3_SolverInt_SB_Enc_AllCombinationsOffers()
         elif solver == "cplex":
             from smtSolvers.CP_CPLEX_Solver_Enc_AllCombinationsOffers import CPlex_Solver_SB_Enc_AllCombinationsOffers
             return CPlex_Solver_SB_Enc_AllCombinationsOffers()
     elif formalization == 2:
         if solver == "z3":
-            from smtSolvers.Formalization2.SMT_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
+            from smtSolvers.Formalization2.JSON_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
             return Z3_SolverInt_SB_Enc_AllCombinationsOffers()
         elif solver == "cplex":
             from smtSolvers.Formalization2.CP_CPLEX_Solver_Enc_AllCombinationsOffers import CPlex_Solver_SB_Enc_AllCombinationsOffers

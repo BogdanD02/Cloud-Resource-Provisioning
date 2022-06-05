@@ -1,9 +1,9 @@
 {
     "Solver-Types": [
-        "SAT", "SMT"
+        "MiniZinc", "JSON"
     ],
 
-    "SAT-Solvers": [
+    "MiniZinc-Solvers": [
         {
             "Name": "Chuffed",
             "Keywd": "chuffed",
@@ -21,7 +21,7 @@
         }
     ],
 
-    "SMT-Solvers": [
+    "JSON-Solvers": [
         {
             "Name": "Z3 Solver",
             "Keywd": "z3",

@@ -47,12 +47,12 @@ def parse_config(config_path: str = "Config/config.json"):
             # Loading source details
             #
             for item in data["Source-Config"]:
-                if item["Type"] == "SAT":
+                if item["Type"] == "MiniZinc":
                     sat_settings["model_path"] = item["Path"]
                     sat_settings["model_ext"] = item["Extension"]
                     sat_settings["formalization"] = item["Formalization"]
 
-                elif item["Type"] == "SMT":
+                elif item["Type"] == "JSON":
                     smt_settings["model_path"] = item["Path"]
                     smt_settings["model_ext"] = item["Extension"]
                     smt_settings["formalization"] = item["Formalization"]
@@ -65,12 +65,12 @@ def parse_config(config_path: str = "Config/config.json"):
             # Loading input details
             #
             for item in data["Input-Config"]:
-                if item["Type"] == "SAT":
+                if item["Type"] == "MiniZinc":
                     sat_settings["input_path"] = item["Path"]
                     sat_settings["input_ext"] = item["Extension"]
                     sat_settings["offers"] = item["Offer-Numbers"]
 
-                elif item["Type"] == "SMT":
+                elif item["Type"] == "JSON":
                     smt_settings["input_path"] = item["Path"]
                     smt_settings["input_ext"] = item["Extension"]
                     smt_settings["offers"] = item["Offer-Numbers"]
@@ -83,14 +83,14 @@ def parse_config(config_path: str = "Config/config.json"):
             # Loading surrogate details
             #
             for item in data["Surrogate-Config"]:
-                if item["Type"] == "SAT":
+                if item["Type"] == "MiniZinc":
                     sat_settings["surrogate_output_path"] = item["Output-Path"]
                     sat_settings["surrogate_output_ext"] = item["Output-Extension"]
                     sat_settings["surrogate_path"] = item["Model-Path"]
                     sat_settings["surrogate_ext"] = item["Model-Extension"]
                     sat_settings["build_surrogate"] = item['Enabled']
 
-                elif item["Type"] == "SMT":
+                elif item["Type"] == "JSON":
                     smt_settings["surrogate_output_path"] = item["Output-Path"]
                     smt_settings["surrogate_output_ext"] = item["Output-Extension"]
                     smt_settings["surrogate_path"] = item["Model-Path"]
@@ -116,7 +116,7 @@ def parse_config(config_path: str = "Config/config.json"):
                 test_settings["symmetry_breakers"] = []
 
             smt_settings["symmetry_breaking_config"] = None
-            sat_settings["symmetry_breaking_config"] = item["SAT-SB-File"]
+            sat_settings["symmetry_breaking_config"] = item["MiniZinc-SB-File"]
 
             solver_config = item["Solver-Config-File"]
             use_case_config = item["Use-Case-Config-File"]
@@ -125,8 +125,8 @@ def parse_config(config_path: str = "Config/config.json"):
             log("INIT", "ERROR", "Unknown key in general configuration")
             exit(1)
 
-    settings["SAT"] = sat_settings
-    settings["SMT"] = smt_settings
+    settings["MiniZinc"] = sat_settings
+    settings["JSON"] = smt_settings
     settings["Test"] = test_settings
 
     with open(solver_config, "r") as file:

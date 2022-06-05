@@ -24,7 +24,7 @@ def prepare_surrogate_instance(model: str, scaling_components: list = []):
         model (str): The name of the model
         scaling_components (list, optional): A list containing components and their number of instances. Defaults to [].
     """    
-    Minizinc_instance = Instance(Solver.lookup("chuffed"), Model(f"{src.init.settings['SAT']['surrogate_path']}/{model}.{src.init.settings['SAT']['surrogate_ext']}"))
+    Minizinc_instance = Instance(Solver.lookup("chuffed"), Model(f"{src.init.settings['MiniZinc']['surrogate_path']}/{model}.{src.init.settings['MiniZinc']['surrogate_ext']}"))
 
     for item in scaling_components:
         Minizinc_instance[item["name"]] = item["inst"]
@@ -38,16 +38,16 @@ def build_output(content: list):
     Args:
         content (list): The contents of the csv file
     """
-    with open(f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}", "w") as outputFile:
+    with open(f"{src.init.settings['MiniZinc']['surrogate_output_path']}/Surrogate.{src.init.settings['MiniZinc']['surrogate_output_ext']}", "w") as outputFile:
         writer = DictWriter(outputFile, ["Name", "Instances", "Estimated VMs"])
         
         writer.writeheader()
         writer.writerows(content)
         
-    if f"{src.init.settings['SAT']['surrogate_output_path']}/Surrogate.{src.init.settings['SAT']['surrogate_output_ext']}" != \
-       f"{src.init.settings['SMT']['surrogate_output_path']}/Surrogate.{src.init.settings['SMT']['surrogate_output_ext']}":
+    if f"{src.init.settings['MiniZinc']['surrogate_output_path']}/Surrogate.{src.init.settings['MiniZinc']['surrogate_output_ext']}" != \
+       f"{src.init.settings['JSON']['surrogate_output_path']}/Surrogate.{src.init.settings['JSON']['surrogate_output_ext']}":
 
-        with open(f"{src.init.settings['SMT']['surrogate_output_path']}/Surrogate.{src.init.settings['SMT']['surrogate_output_ext']}", "w") as outputFile:
+        with open(f"{src.init.settings['JSON']['surrogate_output_path']}/Surrogate.{src.init.settings['JSON']['surrogate_output_ext']}", "w") as outputFile:
             writer = DictWriter(outputFile, ["Name", "Instances", "Estimated VMs"])
             
             writer.writeheader()

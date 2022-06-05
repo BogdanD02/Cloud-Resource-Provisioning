@@ -14,7 +14,6 @@
  ****      EXTERNAL MODULES     ****
  ****                           ****
  ***********************************/
-include "Modules/Formalization1/SymmetryBreaking.mzn";
 include "Modules/Formalization1/GeneralVariables.mzn";
 include "Modules/Formalization1/GeneralConstraints.mzn";
 
@@ -24,7 +23,7 @@ include "Modules/Formalization1/GeneralConstraints.mzn";
  ****      INPUT VARIABLES      ****
  ****                           ****
  ***********************************/
-int: WPInstances = 5;
+int: WPInstances = 6;
 
 /***********************************
  ****                           ****
@@ -76,6 +75,5 @@ constraint upperBound(AssignmentMatrix, VM, DNS_LoadBalancer, 1);
  ****      SOLVING PROBLEM      ****
  ****                           ****
  ***********************************/
-constraint PRL(Price, AssignmentMatrix, NoComponents, VM, 1);
 solve minimize sum(k in 1..VM)(Price[k]);
 
