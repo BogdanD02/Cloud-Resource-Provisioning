@@ -1,5 +1,5 @@
 from z3 import *
-from smtSolvers.ManuverSolver import ManuverSolver
+from Solvers.Core.ManuverSolver import ManuverSolver
 import time
 
 class Z3_Solver_Int_Parent(ManuverSolver):#ManeuverProblem):

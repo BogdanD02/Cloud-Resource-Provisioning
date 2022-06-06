@@ -1,10 +1,9 @@
 import docplex.mp.model as cpx
-import docloud as dc
 import docplex.util
 from docplex.mp.conflict_refiner import ConflictRefiner, VarUbConstraintWrapper, VarLbConstraintWrapper
 import time
-from docplex.mp.functional import LogicalOrExpr, LogicalAndExpr
-from smtSolvers.ManuverSolver import ManuverSolver
+from docplex.mp.functional import  LogicalAndExpr
+from Solvers.Core.ManuverSolver import ManuverSolver
  
 class CPlex_Solver_Parent(ManuverSolver):
     def _initSolver(self):

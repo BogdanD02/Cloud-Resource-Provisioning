@@ -1,6 +1,6 @@
 from z3 import *
 
-from smtSolvers.ManuverSolver import ManuverSolver
+from Solvers.Core.ManuverSolver import ManuverSolver
 class ManuverSolver_SB(ManuverSolver):
     def _symmetry_breaking(self):
 

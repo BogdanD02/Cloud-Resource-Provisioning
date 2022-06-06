@@ -88,13 +88,14 @@ def writeOutput(output_path: str, form: int, result, name: str, solver: str, off
     output_path = f"{output_path}/Formalization{form}"
 
     create_directory(output_path)
+    create_directory(f"{output_path}/csv")
 
     if breaker != None:
-        create_directory(f"{output_path}/{breaker}")
-        output_path = f"{output_path}/{breaker}"
+        create_directory(f"{output_path}/csv/{breaker}")
+        output_path = f"{output_path}/csv/{breaker}"
     else:
-        create_directory(f"{output_path}/NoSym")
-        output_path = f"{output_path}/NoSym"
+        create_directory(f"{output_path}/csv/NoSym")
+        output_path = f"{output_path}/csv/NoSym"
     create_directory(f"{output_path}/{solver}")
 
     if inst == 0:

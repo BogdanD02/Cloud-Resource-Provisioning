@@ -1,6 +1,6 @@
 from z3 import *
-from smtSolvers.SMT_Solver_Z3 import Z3_Solver_Int_Parent
-from smtSolvers.ManuverSolver_SB import ManuverSolver_SB
+from Solvers.Formalization1.Z3.SMT_Solver_Z3 import Z3_Solver_Int_Parent
+from Solvers.Core.ManuverSolver_SB import ManuverSolver_SB
 
 class Z3_SolverInt_SB_Enc_AllCombinationsOffers(Z3_Solver_Int_Parent, ManuverSolver_SB):
 

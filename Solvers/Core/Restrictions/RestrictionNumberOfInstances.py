@@ -1,5 +1,5 @@
 import numpy
-import random
+
 
 class RestrictionFullDeployment:
     def __init__(self, component, componentList, problem):

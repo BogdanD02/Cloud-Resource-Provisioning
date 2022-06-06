@@ -1,5 +1,4 @@
 import time
-import numpy
 from ortools.constraint_solver import pywrapcp
 
 class CP_Solver_Got_Nr_Instances:

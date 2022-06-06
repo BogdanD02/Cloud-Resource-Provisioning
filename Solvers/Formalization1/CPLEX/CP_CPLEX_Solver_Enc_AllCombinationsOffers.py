@@ -1,5 +1,5 @@
-from smtSolvers.CP_CPLEX_Solver import CPlex_Solver_Parent
-from smtSolvers.ManuverSolver_SB import ManuverSolver_SB
+from Solvers.Formalization1.CPLEX.CP_CPLEX_Solver import CPlex_Solver_Parent
+from Solvers.Core.ManuverSolver_SB import ManuverSolver_SB
 
 class CPlex_Solver_SB_Enc_AllCombinationsOffers(CPlex_Solver_Parent, ManuverSolver_SB):
 

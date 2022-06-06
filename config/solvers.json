@@ -12,7 +12,7 @@
         {
             "Name": "GeCode",
             "Keywd": "gecode",
-            "Enabled": true
+            "Enabled": false
         },
         {
             "Name": "Google OR-Tools",
@@ -25,12 +25,12 @@
         {
             "Name": "Z3 Solver",
             "Keywd": "z3",
-            "Enabled": false
+            "Enabled": true
         },
         {
             "Name": "IBM CPLEX",
             "Keywd": "cplex",
-            "Enabled": false
+            "Enabled": true
         }
     ] 
 }

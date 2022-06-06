@@ -1,14 +1,13 @@
 import json
 import numpy
-from smtSolvers.restrictions.RestrictionConflicts import RestrictionConflict, RestrictionAlphaOrBeta
-from smtSolvers.restrictions.RestrictionDependences import RestrictionOneToOneDependency, \
+from Solvers.Core.Restrictions.RestrictionConflicts import RestrictionConflict, RestrictionAlphaOrBeta
+from Solvers.Core.Restrictions.RestrictionDependences import RestrictionOneToOneDependency, \
     RestrictionOneToManyDependency, RestrictionManyToManyDependency, RestrictionManyToManyDependencyNew
-from smtSolvers.restrictions.RestrictionNumberOfInstances import RestrictionUpperLowerEqualBound, \
+from Solvers.Core.Restrictions.RestrictionNumberOfInstances import RestrictionUpperLowerEqualBound, \
     RestrictionRangeBound, RestrictionFullDeployment, RestrictionRequireProvideDependency
-from smtSolvers.Component import Component
-from smtSolvers.conflictGraph import getMaxClique
+from Solvers.Core.Component import Component
+from Solvers.Core.conflictGraph import getMaxClique
 import logging
-import networkx as nx
 
 class ManeuverProblem:
     def __init__(self):
@@ -32,31 +31,6 @@ class ManeuverProblem:
         self.nrComp = nr_comp
         self.R = numpy.zeros((self.nrComp, self.nrComp),  dtype=numpy.int) #conflicts graph
         self.D = numpy.zeros((self.nrComp, self.nrComp), dtype=numpy.int) #corelation hraph
-
-
-
-    def solveCP(self, choosing_stategy, solutions_limit, optimize_price, available_configurations, time_limit):
-        """
-        Start solving the problem using the chosen solver and available configurations for VM
-        :param cpSolver: Solver choosed to solve the problem
-        :return:
-        """
-        self.logger.info("Resolve problem using CP solver ")
-        from maneuverRecomadEngine.exactsolvers import CP_Solver_GOT
-        cpSolver = CP_Solver_GOT.CP_Solver_Got(self, choosing_stategy, solutions_limit, optimize_price,
-                                               available_configurations, time_limit, self.nrVM)
-
-        # cpSolver = CP_Solver_GOT.CP_Solver_Got(self, choosing_stategy, 2, False,
-        #                                                                         None, 10000)
-
-        # self.restrictionsList.append(RestrictionHardware(self._getComponentsHardwareRestrictions(),
-        #                                                  cpSolver.availableConfig, self))
-
-        for restriction in self.restrictionsList:
-            restriction.generateRestrictions(cpSolver)
-
-        return cpSolver.run()
-
 
 
     # def solveLIP(self, choosing_stategy, solutions_limit):
@@ -122,7 +96,7 @@ class ManeuverProblem:
         :return:
         """
         self.logger.info("Find number of needed virtual machines based on components number restrictions")
-        from smtSolvers.CP_Solver_Number_of_Instances import CP_Solver_Got_Nr_Instances
+        from Solvers.Core.CP_Solver_Number_of_Instances import CP_Solver_Got_Nr_Instances
         cpSolver = CP_Solver_Got_Nr_Instances(self, choosing_stategy, solutions_limit)
 
         for restriction in self.restrictionsList:

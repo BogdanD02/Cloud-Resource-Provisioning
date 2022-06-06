@@ -1,5 +1,5 @@
 import json
-from smtSolvers.ProblemDefinition import ManeuverProblem
+from Solvers.Core.ProblemDefinition import ManeuverProblem
 
 def read_available_configurations(fileConfigurations):
     with open(fileConfigurations) as json_data:
@@ -37,15 +37,15 @@ def prepareManuverProblem(problem_file_name, configurations_file_name, scaling_c
 def getSolver(solver, formalization: int = 1):
     if formalization == 1:
         if solver == "z3":
-            from smtSolvers.JSON_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
+            from Solvers.Formalization1.Z3.SMT_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
             return Z3_SolverInt_SB_Enc_AllCombinationsOffers()
         elif solver == "cplex":
-            from smtSolvers.CP_CPLEX_Solver_Enc_AllCombinationsOffers import CPlex_Solver_SB_Enc_AllCombinationsOffers
+            from Solvers.Formalization1.CPLEX.CP_CPLEX_Solver_Enc_AllCombinationsOffers import CPlex_Solver_SB_Enc_AllCombinationsOffers
             return CPlex_Solver_SB_Enc_AllCombinationsOffers()
     elif formalization == 2:
         if solver == "z3":
-            from smtSolvers.Formalization2.JSON_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
+            from Solvers.Formalization2.Z3.SMT_Solver_Z3_Int_SB_AllCombinationsOffers import Z3_SolverInt_SB_Enc_AllCombinationsOffers
             return Z3_SolverInt_SB_Enc_AllCombinationsOffers()
         elif solver == "cplex":
-            from smtSolvers.Formalization2.CP_CPLEX_Solver_Enc_AllCombinationsOffers import CPlex_Solver_SB_Enc_AllCombinationsOffers
+            from Solvers.Formalization2.CPLEX.CP_CPLEX_Solver_Enc_AllCombinationsOffers import CPlex_Solver_SB_Enc_AllCombinationsOffers
             return CPlex_Solver_SB_Enc_AllCombinationsOffers()

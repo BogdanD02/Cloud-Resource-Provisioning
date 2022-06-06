@@ -1,8 +1,5 @@
-from distutils.command.build import build
-from tracemalloc import start
 from networkx import Graph, find_cliques
 from minizinc import Model, Instance, Solver
-from json import load
 import src.init
 
 """
