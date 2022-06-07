@@ -81,13 +81,13 @@ This file stores general configuration: from paths to general options for runnin
 
 This file stores solver related configuration.
 
-- SAT-Solvers
+- MiniZinc-Solvers
   Stores information regarding the different SAT solvers used for testing
   - **Name** : The name of the solver
   - **Keywd** : A unique identifier of the solver
   - **Enabled** : Denotes whether tests should be run with this solver
 
-- SMT-Solvers
+- JSON-Solvers
   Stores information regarding the different SMT solvers used for testing
   - **Name** : The name of the solver
   - **Keywd** : A unique identifier of the solver
