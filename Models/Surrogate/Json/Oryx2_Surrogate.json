@@ -1,0 +1,38 @@
+{
+    "application" : "Oryx 2",
+    "components" :[
+      {
+        "id": 1, 
+        "name" : "Kafka"
+      },
+      {
+        "id": 2, 
+        "name" : "Zookeeper"
+      },
+      {
+        "id": 3, 
+        "name" : "HDFS.NameNode"
+      },
+      {
+        "id": 4, 
+        "name" : "HDFS.SecondaryNameNode"
+      },
+      {
+        "id": 6, 
+        "name" : "YARN.ResourceManagement"
+      },
+      {
+        "id": 7, 
+        "name" : "YARN.HistoryService"
+      },
+      {
+        "id": 10, 
+        "name" : "Spark.HistoryService"
+      }
+    ],
+    "restrictions" : [
+      {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":2, "alphaCompIdInstances":2, "betaCompIdInstances":1},
+      {"type":"EqualBound", "compsIdList":[7], "bound": 1},
+      {"type":"EqualBound", "compsIdList":[10], "bound": 1}
+    ]
+}

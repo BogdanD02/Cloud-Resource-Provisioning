@@ -1,0 +1,29 @@
+{
+    "application" : "SecureBillingEmail",
+    "components" :[
+      {
+        "id": 1, 
+        "name" : "Coding Service"
+      },
+      {
+        "id": 2, 
+        "name" : "Security Manager"
+      },
+      {
+        "id": 3, 
+        "name" : "Gateway"
+      },
+      {
+        "id": 4, 
+        "name" : "SQLServer"
+      },
+      {
+        "id": 5, 
+        "name" : "LoadBalancer"
+      }
+    ],
+    "restrictions" : [
+      {"type":"EqualBound",  "compsIdList":[1], "bound": 1},
+      {"type":"EqualBound",  "compsIdList":[5], "bound": 1}
+    ]
+  } 

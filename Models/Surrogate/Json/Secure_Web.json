@@ -1,0 +1,30 @@
+{
+    "application" : "SecureWebContainer",
+    "components" :[
+      {
+        "id": 1, 
+        "name" : "Balancer"
+      },
+      {
+        "id": 2, 
+        "name" : "Apache"
+      },
+      {
+        "id": 3, 
+        "name" : "Nginx"
+      },
+      {
+        "id": 4, 
+        "name" : "IDSServer"
+      }
+    ],
+    "restrictions" : [
+      {"type":"EqualBound",  "compsIdList":[1], "bound": 1},
+      {"type":"LowerBound",  "compsIdList":[2, 3], "bound": 3}
+    ]
+  }
+  
+  
+  
+  
+  

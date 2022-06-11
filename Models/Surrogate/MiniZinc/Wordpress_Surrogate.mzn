@@ -1,4 +1,6 @@
 
+include "Modules/Constraints.mzn";
+
 int : WPInstances;
 var 0..1024 : Wordpress;
 var 0..1024 : MySQL;
@@ -6,31 +8,25 @@ var 0..1024 : DNS_LoadBalancer;
 var 0..1024 : HTTP_LoadBalancer;
 var 0..1024 : Varnish;
 
-predicate requireProvide( var int: alphaCompId, var int: betaCompId, int: alphaCompIdInstances, int: betaCompIdInstances ) 
-          = alphaCompId * alphaCompIdInstances <= betaCompId * betaCompIdInstances ;
-          
-predicate Provide(var int: alphaCompId, var int: betaCompId, int: alphaCompIdInstances)
-          = alphaCompId <= alphaCompIdInstances * betaCompId;
-
-predicate lowerBound (var int: compId, int: bound) =  compId >= bound;
-
-predicate upperBound (var int: compId, int: bound) =  compId <= bound;
-
-predicate exclusiveDeployment( var int: alphaCompId, var int: betaCompId)
-          = (alphaCompId > 0 /\ betaCompId = 0) \/ (alphaCompId = 0 /\ betaCompId > 0);
-
-
 %
 % Use case constraints
 %
-constraint DNS_LoadBalancer > 0 -> Provide(WPInstances, DNS_LoadBalancer, 7);
-constraint HTTP_LoadBalancer > 0 -> Provide(WPInstances, HTTP_LoadBalancer, 3);
+constraint basicAllocation({Wordpress, MySQL, Varnish});
 
-constraint requireProvide(WPInstances, MySQL, 2, 3);
+% In order to correctly estimate the number of VM required
+% we disregard the exclusive deployment component and compute
+% the number of VMs required for each component in that relation.
+% Afterwards we take the highest number of them into the equation.
+constraint if WPInstances < 8 then
+  provide(Wordpress, DNS_LoadBalancer, 7)
+endif;
+
+constraint provide(Wordpress, HTTP_LoadBalancer, 3);
+
+constraint requireProvide(Wordpress, MySQL, 2, 3);
 constraint lowerBound(Varnish,2);
 constraint lowerBound(MySQL, 2);
 constraint upperBound(DNS_LoadBalancer, 1);
-constraint exclusiveDeployment(DNS_LoadBalancer,HTTP_LoadBalancer);
 constraint lowerBound(Wordpress, WPInstances);
 
-solve minimize Wordpress + MySQL + DNS_LoadBalancer + HTTP_LoadBalancer + Varnish;
+solve minimize Wordpress + MySQL + max(DNS_LoadBalancer, HTTP_LoadBalancer) + Varnish;
