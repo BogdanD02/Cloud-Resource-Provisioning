@@ -3,39 +3,39 @@
     "SB-Constraints": [
         {
             "Tag": "L",
-            "Constraint": "constraint L(AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "L(AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PR",
-            "Constraint": "constraint PR(Price, VM, [Start]);\n"
+            "Constraint": "PR(Price, VM, [Start]);\n"
         },
         {
             "Tag": "LX",
-            "Constraint": "constraint LX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "LX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "LPR",
-            "Constraint": "constraint LPR(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "LPR(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PRL",
-            "Constraint": "constraint PRL(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "PRL(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "LLX",
-            "Constraint": "constraint LLX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "LLX(AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PRLX",
-            "Constraint": "constraint PRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "PRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "LPRLX",
-            "Constraint": "constraint LPRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "LPRLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         },
         {
             "Tag": "PRLLX",
-            "Constraint": "constraint PRLLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
+            "Constraint": "PRLLX(Price, AssignmentMatrix, NoComponents, VM, [Start]);\n"
         }
     ]
 }

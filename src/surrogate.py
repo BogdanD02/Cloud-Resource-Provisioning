@@ -2,7 +2,7 @@ from csv import DictWriter
 from minizinc import Instance, Model, Solver
 import src.init
 
-"""
+"""  
 The following script runs all the surrogate problems and builds a single csv
 containing the estimated number of virtual machines (VMs) for each test case.
 
@@ -12,9 +12,36 @@ The format of the csv file is the following:
 Use-case Name, Instances, Estimated VMs
 ```
 
-The generated csv will be placed at the location set inside the `config.json` file.
+The generated csv will be placed at the location set inside the configuration file.
 """
-          
+
+def solve_surrogate(model: str, solver:dict, scaling_components: list = []):
+    """
+    This function will solve a specific surrogate instance, returning a dictionary containing
+    the estimated number of virtual machines required as well as the estimated number of instances
+    for each component.
+
+    Args:
+        model (str): The name of the surrogate model to solve
+        solver (dict): The solver specifications
+        scaling_components (list, optional): A list of components whose instances must be replaced with actual values.
+    
+    Returns:
+        result (any): The result obtained from the surrogate.
+    """
+    result = None
+
+    if solver["type"] == "MiniZinc":
+        instance = prepare_minizinc_instance(model, solver["id"], scaling_components)
+        result = instance.solve()
+
+    #
+    # TO DO : Add support for JSON Surrogate after refactor
+    #
+
+    return result
+    
+
 def prepare_surrogate_instance(model: str, scaling_components: list = []):
     """
     Prepares a Minizinc instance based off the model path and (optionally) the number of instances
@@ -22,6 +49,7 @@ def prepare_surrogate_instance(model: str, scaling_components: list = []):
 
     Args:
         model (str): The name of the model
+        solver (str): The keyword of the solver
         scaling_components (list, optional): A list containing components and their number of instances. Defaults to [].
     """    
     Minizinc_instance = Instance(Solver.lookup("chuffed"), Model(f"{src.init.settings['MiniZinc']['surrogate_path']}/{model}.{src.init.settings['MiniZinc']['surrogate_ext']}"))
@@ -31,9 +59,28 @@ def prepare_surrogate_instance(model: str, scaling_components: list = []):
     
     return Minizinc_instance
 
+def prepare_minizinc_instance(model: str, solver: str, scaling_components: list = []):
+    """
+    Prepares a Minizinc instance based off the model path and (optionally) the number of instances
+    for a specific component.
+
+    Args:
+        model (str): The name of the model
+        solver (str): The keyword of the solver
+        scaling_components (list, optional): A list containing components and their number of instances. Defaults to [].
+    """    
+    Minizinc_instance = Instance(Solver.lookup(solver), Model(f"{src.init.settings['MiniZinc']['surrogate_path']}/{model}.{src.init.settings['MiniZinc']['surrogate_ext']}"))
+
+    for item in scaling_components:
+        Minizinc_instance[item["name"]] = item["inst"]
+    
+    return Minizinc_instance
+
 def build_output(content: list):
     """
     Constructs the CSV file containing the results.
+
+    This function is now obsolete !
 
     Args:
         content (list): The contents of the csv file
@@ -57,6 +104,8 @@ def build_components(scaling_components: list, id: int = 0):
     """
     Given a list of components and their instances, this function generates all possible combinations
     between them.
+
+    This function is now obsolete !
 
     Args:
         scaling_components (list, optional): A list of dictionaries for each scaling component. Defaults to []
@@ -85,6 +134,9 @@ def build_surrogate():
     Goes through each use case, and if it has a surrogate problem it runs it using
     Minizinc and appends the results to the final output. Finally it calls the construction
     of the CSV file containing all output.
+
+    Warning: As the problem is now split into 2 different sections, this function is
+    obsolete as we require an estimation for all components, not just the VM.
     """
     
     content = []

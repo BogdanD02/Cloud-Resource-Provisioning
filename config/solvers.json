@@ -7,17 +7,17 @@
         {
             "Name": "Chuffed",
             "Keywd": "chuffed",
-            "Enabled": false
+            "Enabled": true
         },
         {
             "Name": "GeCode",
             "Keywd": "gecode",
-            "Enabled": false
+            "Enabled": true
         },
         {
             "Name": "Google OR-Tools",
             "Keywd": "or-tools",
-            "Enabled": false
+            "Enabled": true
         }
     ],
 

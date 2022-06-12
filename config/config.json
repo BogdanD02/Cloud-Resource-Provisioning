@@ -47,19 +47,19 @@
         
             "Model-Path": "Models/Surrogate/MiniZinc",
             "Model-Extension": "mzn",
-            "Enabled": false,
+            "Enabled": true,
 
             "Output-Path": "Data/",
             "Output-Extension": "csv"
         },
         {
-            "Model-Path": "Models/Surrogate/json",
+            "Model-Path": "Models/Surrogate/Json",
             "Model-Extension": "json",
             "Type": "JSON",
 
             "Enabled": true,
 
-            "Output-Path": "Data",
+            "Output-Path": "Data/",
             "Output-Extension": "csv"
         }
     ],

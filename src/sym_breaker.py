@@ -30,6 +30,7 @@ def addBreakerConstraint(symmetry_breaker: str = None, start: int = 0):
             constraint = breaker["Constraint"]
             break
     if constraint != None:
+        constraint = "constraint " + constraint
         constraint = constraint.replace("[Start]", str(start))
 
     return constraint

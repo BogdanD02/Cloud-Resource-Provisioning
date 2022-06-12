@@ -1,0 +1,120 @@
+{
+    "Application": "Oryx 2",
+    "Components": [
+        {
+            "Name": "Kafka",
+            "Restrictions": {
+                "CPU": 2,
+                "Memory": 4096,
+                "Storage": 500
+            }
+        },
+        {
+            "Name": "Zookeeper",
+            "Restrictions": {
+                "CPU": 2,
+                "Memory": 2048,
+                "Storage": 500
+            }
+        },
+        {
+            "Name": "HDFS.NameNode",
+            "Restrictions": {
+                "CPU": 8,
+                "Memory": 16000,
+                "Storage": 2000
+            }
+        },
+        {
+            "Name": "HDFS.SecondaryNameNode",
+            "Restrictions": {
+                "CPU": 8,
+                "Memory": 16000,
+                "Storage": 2000
+            }
+        },
+        {
+            "Name": "HDFS.DataNode",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 8000,
+                "Storage": 3000
+            }
+        },
+        {
+            "Name": "YARN.ResourceManagement",
+            "Restrictions": {
+                "CPU": 6,
+                "Memory": 8000,
+                "Storage": 1000
+            }
+        },
+        {
+            "Name": "YARN.HistoryService",
+            "Restrictions": {
+                "CPU": 1,
+                "Memory": 2000,
+                "Storage": 500
+            }
+        },
+        {
+            "Name": "Yarn.NodeManager",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 8000,
+                "Storage": 2000
+            }
+        },
+        {
+            "Name": "Spark.Worker",
+            "Restrictions": {
+                "CPU": 8,
+                "Memory": 32000,
+                "Storage": 1000
+            }
+        },        
+        {
+            "Name": "Spark.HistoryService",
+            "Restrictions": {
+                "CPU": 2,
+                "Memory": 4000,
+                "Storage": 2000
+            }
+        }
+    ],
+
+    "Restrictions": [
+        {
+            "Type": "Colocation",
+            "Components": ["HDFS.DataNode", "Yarn.NodeManager", "Spark.Worker"]
+        },
+        {
+            "Type": "FullDeployment",
+            "Components": ["HDFS.DataNode", "Yarn.NodeManager", "Spark.Worker"]
+        },
+        {
+            "Type": "Conflict",
+            "Components": ["Kafka", "Zookeeper"]
+        },
+        {
+            "Type": "Conflict",
+            "Components": ["HDFS.NameNode", "HDFS.SecondaryNameNode"]
+        },
+        {
+            "Type": "Conflict",
+            "Components": ["Yarn.ResourceManager", "HDFS.NameNode", "HDFS.SecondaryNameNode", "Yarn.HistoryService"]
+        },
+        {
+            "Type": "RequireProvide",
+            "RequireComponent": "Kafka",
+            "RequireInstances": 2,
+            "ProvideComponent": "Zookeeper",
+            "ProvideInstances": 1
+        },
+        {
+            "Type": "EqualBound",
+            "Components": ["Yarn.HistoryService", "Spark.HistoryService"],
+            "Bound": 1
+        }
+    ]
+}

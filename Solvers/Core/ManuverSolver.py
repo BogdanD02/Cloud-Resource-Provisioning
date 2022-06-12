@@ -1,4 +1,3 @@
-from Solvers.Core.Restrictions.RestrictionHardware import RestrictionHardware
 from datetime import datetime
 
 class ManuverSolver(object):
