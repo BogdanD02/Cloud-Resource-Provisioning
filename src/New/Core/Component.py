@@ -1,15 +1,13 @@
 
-class Component:
+class Component():
     """
     Holds the name of a component as well as its requirements.
     The requirements are contained inside a dictionary with the following meaning:
         key = The name of the requirement (e.g. CPU, Memory, Storage)
         value = The amount of requirement (e.g. 1000)
     """
-    Name: str
-    Requirements: dict
 
-    def __init__(self, Name: str, Requirements: dict = {}) -> None:
+    def __init__(self, Name: str, HardwareRequirements: dict = {}) -> None:
         """
         Initializes a new component with the given parameters.
 
@@ -18,7 +16,7 @@ class Component:
             Requirements (dict, optional): A dictionary of component requirements. Defaults to {}
         """
         self.Name = Name
-        self.Requirements = Requirements
+        self.HardwareRequirements = HardwareRequirements
 
     def __getitem__(self, __name: str):
         """
@@ -28,8 +26,8 @@ class Component:
             KeyError: No requirement with that specific name found.
         """
 
-        if __name in self.Requirements.keys():
-            return self.Requirements[__name]
+        if __name in self.HardwareRequirements.keys():
+            return self.HardwareRequirements[__name]
         
         raise KeyError
 
@@ -45,7 +43,7 @@ class Component:
             KeyError: The requirement already exists.
         """
 
-        if Name not in self.Requirements.keys():
-            self.Requirements[Name] = Value
+        if Name not in self.HardwareRequirements.keys():
+            self.HardwareRequirements[Name] = Value
         else:
             raise KeyError

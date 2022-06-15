@@ -1,17 +1,14 @@
-from Solvers.New.Core.Component import Component
-from Solvers.New.Core.Restriction import Restriction
+from src.New.Core.Component import Component
+from src.New.Core.Restriction import Restriction
 from os.path import exists
 from json import load
 from src.init import log
 
 
-class Model:
+class Model():
     """
-    A representation of the JSON problem model.
+    A representation of the problem model.
     """
-    Name: str
-    Components: list
-    Restrictions: list
 
     def __init__(self, ModelFile: str) -> None:
         """
@@ -28,7 +25,7 @@ class Model:
             raise FileNotFoundError
 
         with open(ModelFile, "r") as source:
-            dictionary = load(ModelFile)
+            dictionary = load(source)
         
         self.Name = dictionary["Application"]
         self.Components = []
@@ -46,16 +43,40 @@ class Model:
         # Setting Restrictions
         #
         for R in dictionary["Restrictions"]:
-            temp = Restriction(R["Type"])
+            self.Restrictions.append(
+                Restriction(R["Type"])
+            )
 
-            skip = 1
-            for key, value in R:
-                if skip == 1:
-                    skip = 0
-                    continue
-                
+            for key, value in list(R.items())[1:]:             
                 try:
-                    temp.AddElement((key, value))
-                except KeyError:
+                    self.Restrictions[-1].AddElement((key, value))
+                except ValueError:
                     log("PRE-TESTING", "WARN", "Found duplicate key in model. Skipping duplicates...")
-            self.Restrictions.append(temp)
+
+    def GetComponent(self, Name: str) -> Component:
+        """
+        Gets a component by its name.
+
+        Args:
+            Name (str): The name of the component
+        
+        Returns:
+            Component: The component with that name.
+        
+        Raises:
+            KeyError: Component not found
+        """
+        for Comp in self.Components:
+            if Comp.Name == Name:
+                return Comp
+        
+        raise KeyError
+
+    def GetRestrictions(self) -> list:
+        """
+        This is used when employing symmetry breakers.
+        
+        Returns:
+            list: A list of Restriction objects.
+        """
+        return self.Restrictions

@@ -94,15 +94,18 @@
         },
         {
             "Type": "Conflict",
-            "Components": ["Kafka", "Zookeeper"]
+            "AlphaComponent": "Kafka",
+            "Components": ["Zookeeper"]
         },
         {
             "Type": "Conflict",
-            "Components": ["HDFS.NameNode", "HDFS.SecondaryNameNode"]
+            "AlphaComponent": "HDFS.NameNode",
+            "Components": ["HDFS.SecondaryNameNode"]
         },
         {
             "Type": "Conflict",
-            "Components": ["Yarn.ResourceManager", "HDFS.NameNode", "HDFS.SecondaryNameNode", "Yarn.HistoryService"]
+            "AlphaComponent": "Yarn.ResourceManager",
+            "Components": ["HDFS.NameNode", "HDFS.SecondaryNameNode", "Yarn.HistoryService"]
         },
         {
             "Type": "RequireProvide",
