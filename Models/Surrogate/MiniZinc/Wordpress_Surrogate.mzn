@@ -17,7 +17,7 @@ constraint basicAllocation({Wordpress, MySQL, Varnish});
 % we disregard the exclusive deployment component and compute
 % the number of VMs required for each component in that relation.
 % Afterwards we take the highest number of them into the equation.
-constraint if WPInstances < 8 then
+constraint if DNS_LoadBalancer > 0 then
   provide(Wordpress, DNS_LoadBalancer, 7)
 endif;
 

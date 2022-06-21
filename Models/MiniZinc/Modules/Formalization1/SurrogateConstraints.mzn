@@ -1,3 +1,16 @@
+/*
+ * Constraints for MiniZinc
+ * ---------------------------------
+ *
+ * @b Description
+ * This file is to be included in all Minizinc models.
+ * It provides the definitions for the general constraints used in all models.
+ *
+ * @author 
+ *    David Bogdan
+ *    bogdan.david02@e-uvt.ro
+ */
+
 % Create bound constraints
 predicate lowerBound(var int: compID, int: bound) = compID >= bound;
 predicate lowerBound(var int: compID1, var int: compID2, int: bound) = compID1 + compID2 >= bound;
