@@ -21,12 +21,15 @@ constraint if DNS_LoadBalancer > 0 then
   provide(Wordpress, DNS_LoadBalancer, 7)
 endif;
 
-constraint provide(Wordpress, HTTP_LoadBalancer, 3);
+constraint if HTTP_LoadBalancer > 0 then
+  provide(Wordpress, HTTP_LoadBalancer, 3)
+endif;
 
+constraint HTTP_LoadBalancer + DNS_LoadBalancer >= 1;
 constraint requireProvide(Wordpress, MySQL, 2, 3);
 constraint lowerBound(Varnish,2);
 constraint lowerBound(MySQL, 2);
 constraint upperBound(DNS_LoadBalancer, 1);
 constraint lowerBound(Wordpress, WPInstances);
 
-solve minimize Wordpress + MySQL + max(DNS_LoadBalancer, HTTP_LoadBalancer) + Varnish;
+solve minimize Wordpress + MySQL + DNS_LoadBalancer + HTTP_LoadBalancer + Varnish;

@@ -1,3 +1,4 @@
+from src.New.Core.Restriction import Restriction
 from src.New.Core.Machine import VirtualMachine
 from src.New.Core.Model import Model
 from json import load
@@ -77,3 +78,24 @@ class Instance():
             str: The symmetry breaker.
         """
         return self.__SB
+
+    def SetComponentInstances(self, CompName: str, Inst: int):
+        """
+        Used to set the number of instances for scaling components.
+
+        Args:
+            CompName (str): The name of the component
+            Inst (int): The number of instances
+
+        Raises:
+            KeyError: Invalid component name.
+        """
+        try:
+            temp = Restriction("EqualBound")
+
+            temp.AddElement(("Components", [self.__Model.GetComponent(CompName).Name]))
+            temp.AddElement(("Bound", Inst))
+
+            self.__Model.GetRestrictions().append(temp)
+        except KeyError:
+            raise KeyError

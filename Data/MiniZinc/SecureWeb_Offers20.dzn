@@ -4,6 +4,7 @@ NoComponents = 5;
 HardwareREQ = 3;
 % number of virtual machines offers
 VMOffers = 20;
+VM=5;
 % virtual machines offers
 VMSpecs = [|64, 976000, 1000, 
 |64, 488000, 8000, 

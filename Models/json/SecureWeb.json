@@ -1,66 +1,83 @@
 {
-  "application" : "SecureWebContainer",
-  "components" :[
-    {
-      "id": 1, "name" : "Balancer",
-      "Compute": {"CPU":4, "GPU":"false", "Memory": 2048},
-      "Storage": {"StorageType": "HDD", "StorageSize": 500},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "",
-      "preferences": {}
-    },
-    {
-      "id": 2, "name" : "Apache",
-      "Compute": {"CPU":2, "GPU":"false", "Memory": 512},
-      "Storage": {"StorageType": "HDD", "StorageSize": 1000},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "",
-      "preferences": {}
-    
-    },
-    {
-      "id": 3, "name" : "Nginx",
-      "Compute": {"CPU":4, "GPU":"false", "Memory": 2048},
-      "Storage": {"StorageType": "HDD", "StorageSize": 1000},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "",
-      "preferences": {}
-    },
-    {
-      "id": 4, "name" : "IDSServer",
-      "Compute": {"CPU":8, "GPU":"false", "Memory": 16000},
-      "Storage": {"StorageType": "HDD", "StorageSize": 2000},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "",
-      "preferences": {}
-    },
-    {
-      "id": 5, "name" : "IDSAgent",
-      "Compute": {"CPU":1, "GPU":"false", "Memory": 256},
-      "Storage": {"StorageType": "HDD", "StorageSize": 250},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "",
-      "preferences": {}
-    }
-  ],
-  "IP" : {"publicIPs": 1, "IPType": "IP4"},
-  "comment-restrictions": "Number 3 from LowerBound below is LoR=LevelOfRedundancy; FullDeployment: compsIdList: the list of components that component alpha is in conflict with",
-  "restrictions" : [
-    {"type":"Conflicts", "alphaCompId":1, "compsIdList":[2, 3, 4, 5]},
-    {"type":"Conflicts", "alphaCompId":2, "compsIdList":[3]},
-    {"type":"EqualBound",  "compsIdList":[1], "bound": 1},
-    {"type":"LowerBound",  "compsIdList":[2, 3], "bound": 3},
-    {"type":"Conflicts", "alphaCompId":4, "compsIdList":[1, 2, 3, 5]},
-    {"type":"FullDeployment", "alphaCompId":5, "compsIdList":[4, 1]},
-    {"type":"OneToManyDependency", "alphaCompId":4, "betaCompId":5, "number": 10}
-  ]
+    "Application": "SecureWeb Server",
+    "Components": [
+        {
+            "Name": "Balancer",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 2048,
+                "Storage": 500
+            }
+        },
+        {
+            "Name": "Apache",
+            "Restrictions": {
+                "CPU": 2,
+                "Memory": 512,
+                "Storage": 1000
+            }
+        },
+        {
+            "Name": "Ngnix",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 2048,
+                "Storage": 1000
+            }
+        },
+        {
+            "Name": "IDS_Server",
+            "Restrictions": {
+                "CPU": 8,
+                "Memory": 16000,
+                "Storage": 2000
+            }
+        },
+        {
+            "Name": "IDS_Agent",
+            "Restrictions": {
+                "CPU": 1,
+                "Memory": 256,
+                "Storage": 250
+            }
+        }
+    ],
+    "Restrictions": [
+        {
+            "Type": "Conflict",
+            "AlphaComponent": "Balancer",
+            "Components": ["Apache", "Ngnix", "IDS_Server", "IDS_Agent"]
+        },
+        {
+            "Type": "Conflict",
+            "AlphaComponent": "Apache",
+            "Components": ["Ngnix"]
+        },
+        {
+            "Type": "Conflict",
+            "AlphaComponent": "IDS_Server",
+            "Components": ["Balancer", "Apache", "Ngnix", "IDS_Agent"]
+        },
+        {
+            "Type": "FullDeployment",
+            "Conflicts": ["Balancer", "IDS_Server"],
+            "Components": ["IDS_Agent"]
+        },
+        {
+            "Type": "EqualBound",
+            "Components": ["Balancer"],
+            "Bound": 1
+        },
+        {
+            "Type": "LowerBound",
+            "Components": ["Apache", "Ngnix"],
+            "Bound": 3
+        },
+        {
+            "Type": "BoundedRequireProvide",
+            "RequireComponent": "IDS_Agent",
+            "ProvideComponent": "IDS_Server",
+            "ProvideInstances": 10
+        }
+    ]
 }
-
-
-
-

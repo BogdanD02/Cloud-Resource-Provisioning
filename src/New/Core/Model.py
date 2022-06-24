@@ -43,15 +43,15 @@ class Model():
         # Setting Restrictions
         #
         for R in dictionary["Restrictions"]:
-            self.Restrictions.append(
-                Restriction(R["Type"])
-            )
+            temp = Restriction(R["Type"])
 
             for key, value in list(R.items())[1:]:             
                 try:
-                    self.Restrictions[-1].AddElement((key, value))
+                    temp.AddElement((key, value))
                 except ValueError:
                     log("PRE-TESTING", "WARN", "Found duplicate key in model. Skipping duplicates...")
+
+            self.Restrictions.append(temp)
 
     def GetComponent(self, Name: str) -> Component:
         """

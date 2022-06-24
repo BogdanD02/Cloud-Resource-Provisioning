@@ -1,65 +1,102 @@
 {
-  "application" : "WordPress3",
-  "comment-general": "From the Zephyrus-ASE paper: at least 3 replicas of Wordpress or at least 7 DNS (we can not capture OR in the UI, we have here the 3 Wordpress replicas); Answer: minimum 4VMs",
-  "components" :[
-    {"id": 1, "name" : "WordPress",
-      "Compute": {"CPU":2, "GPU":"false", "Memory": 512},
-      "Storage": {"StorageType": "HDD", "StorageSize": 1000},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "Linux",
-      "preferences": {}
-    },
-    {"id": 2, "name" : "MySQL",
-      "Compute": {"CPU":2, "GPU":"false", "Memory": 512},
-      "Storage": {"StorageType": "HDD", "StorageSize": 2000},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "Linux",
-      "preferences": {}
-  
-    },
-    {"id": 3, "name" : "DNSLoadBalancer",
-      "comments": "As load balancers, either DNS or HTTP",
-      "Compute": {"CPU":4, "GPU":"false", "Memory": 2048},
-      "Storage": {"StorageType": "HDD", "StorageSize": 500},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "Linux",
-      "preferences": {}
-    },
-    {"id": 4, "name" : "HTTPLoadBalancer",
-      "Compute": {"CPU":4, "GPU":"false", "Memory": 2048},
-      "Storage": {"StorageType": "HDD", "StorageSize": 500},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "Linux",
-      "preferences": {}
-    },
-    {"id": 5, "name" : "Varnish",
-      "Compute": {"CPU":4, "GPU":"false", "Memory": 4000},
-      "Storage": {"StorageType": "HDD", "StorageSize": 500},
-      "Network": {},
-      "keywords": [],
-      "operatingSystem": "Linux",
-      "preferences": {}
-    }
-  ],
-  "IP" : {"publicIPs": 1, "IPType": "IP4"},
-  "comment-restrictions": "RequireProvideDependency to be read as: for 1 instance of component with id 2 there must be at least ",
-  "restrictions" : [{"type":"LowerBound",  "compsIdList":[1], "bound": -1},
-                    {"type":"LowerBound",  "compsIdList":[2], "bound": 2},
-                    {"type":"LowerBound",  "compsIdList":[5], "bound": 2},
-                    {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":3,
-                      "alphaCompIdInstances":1, "betaCompIdInstances":7},
-                    {"type":"UpperBound",  "compsIdList":[3], "bound": 1},
-                    {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":4,
-                      "alphaCompIdInstances":1, "betaCompIdInstances":3},
-                    {"type":"RequireProvideDependency", "alphaCompId":1, "betaCompId":2,
-                      "alphaCompIdInstances":2, "betaCompIdInstances":3},
-                    {"type":"AlternativeComponents", "alphaCompId":3, "betaCompId":4},
-                    {"type":"Conflicts", "alphaCompId":3, "compsIdList":[1, 2, 5]},
-                    {"type":"Conflicts", "alphaCompId":4, "compsIdList":[1, 2, 5]},
-                    {"type":"Conflicts", "alphaCompId":5, "compsIdList":[2, 3, 4]}
-  ]
-  }
+    "Application": "Wordpress",
+    "Components": [
+        {
+            "Name": "Wordpress",
+            "Restrictions": {
+                "CPU": 2,
+                "Memory": 512,
+                "Storage": 1000
+            }
+        },
+        {
+            "Name": "MySQL",
+            "Restrictions": {
+                "CPU": 2,
+                "Memory": 512,
+                "Storage": 2000
+            }
+        },
+        {
+            "Name": "HTTP_LoadBalancer",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 2048,
+                "Storage": 500
+            }
+        },
+        {
+            "Name": "DNS_LoadBalancer",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 2048,
+                "Storage": 500
+            }
+        },
+        {
+            "Name": "Varnish",
+            "Restrictions": {
+                "CPU": 4,
+                "Memory": 4000,
+                "Storage": 500
+            }
+        }
+    ],
+    "Restrictions": [
+        {
+            "Type": "Conflict",
+            "AlphaComponent": "DNS_LoadBalancer",
+            "Components": ["Wordpress", "MySQL", "Varnish"]
+        },
+        {
+            "Type": "Conflict",
+            "AlphaComponent": "HTTP_LoadBalancer",
+            "Components": ["Wordpress", "MySQL", "Varnish"]
+        },
+        {
+            "Type": "Conflict",
+            "AlphaComponent": "Varnish",
+            "Components": ["MySQL", "HTTP_LoadBalancer", "DNS_LoadBalancer"]
+        },
+        {
+            "Type": "LowerBound",
+            "Components": ["MySQL"],
+            "Bound": 2
+        },
+        {
+            "Type": "LowerBound",
+            "Components": ["Varnish"],
+            "Bound": 2
+        },
+        {
+            "Type": "UpperBound",
+            "Components": ["DNS_LoadBalancer"],
+            "Bound": 1
+        },
+        {
+            "Type": "RequireProvide",
+            "RequireComponent": "Wordpress",
+            "RequireInstances": 1,
+            "ProvideComponent": "DNS_LoadBalancer",
+            "ProvideInstances": 7
+        },
+        {
+            "Type": "RequireProvide",
+            "RequireComponent": "Wordpress",
+            "RequireInstances": 1,
+            "ProvideComponent": "HTTP_LoadBalancer",
+            "ProvideInstances": 3
+        },
+        {
+            "Type": "RequireProvide",
+            "RequireComponent": "Wordpress",
+            "RequireInstances": 2,
+            "ProvideComponent": "MySQL",
+            "ProvideInstances": 3
+        },
+        {
+            "Type": "ExclusiveDeployment",
+            "Components": ["DNS_LoadBalancer", "HTTP_LoadBalancer"]
+        }
+    ]
+}

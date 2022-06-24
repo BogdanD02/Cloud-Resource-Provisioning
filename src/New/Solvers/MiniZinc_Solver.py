@@ -1,11 +1,10 @@
 from datetime import timedelta
-import enum
 import minizinc as mzn
 import src.init
-from os import remove, system, unlink
-from os.path import exists
+from os import unlink
 from src.New.Core.Solver import Solver
 from src.New.Core.Instance import Instance
+from src.New.Core.Restriction import Restriction
 from tempfile import NamedTemporaryFile
 
 
@@ -17,29 +16,40 @@ class MiniZinc_Solver(Solver):
     the Instance to a MiniZinc instance which can then be run using MiniZinc solvers.
     """
 
-    def __init__(self, keyword: str, Inst: Instance) -> None:
+    def __init__(self, keyword: str, Inst: Instance, saveFiles: bool = False) -> None:
         """
         Creates a new MiniZinc solver.
 
         Args:
             keyword (str): The name of the solver to instantiate.
             Inst (Instance): The problem instance we want to solve.
+            saveFiles (bool, optional): Flag that tells the solver not to delete model files. Defaults to False.
         """
         super().__init__(Inst)
 
         self.__Solver = super()._GetMiniZincSolver(keyword)
-        self.__ModelFile = NamedTemporaryFile(delete=False, suffix='.' + src.init.settings['MiniZinc']['model_ext'], dir=src.init.settings['MiniZinc']['model_path'])
-        self.__DataFile = NamedTemporaryFile(delete=False, suffix='.' + src.init.settings['MiniZinc']['input_ext'], dir=src.init.settings['MiniZinc']['input_path'])
-        
+        self.__SaveFlag = saveFiles
+
+        if not saveFiles:
+            self.__ModelFile = NamedTemporaryFile(delete=False, suffix='.' + src.init.settings['MiniZinc']['model_ext'], dir=src.init.settings['MiniZinc']['model_path'])
+            self.__DataFile = NamedTemporaryFile(delete=False, suffix='.' + src.init.settings['MiniZinc']['input_ext'], dir=src.init.settings['MiniZinc']['input_path'])
+        else:
+            self.__ModelFile = open(f"{src.init.settings['MiniZinc']['model_path']}/{self._Instance.GetModel().Name}_{self._Instance.GetSB()}.{src.init.settings['MiniZinc']['model_ext']}", "w")
+            self.__DataFile = open(f"{src.init.settings['MiniZinc']['input_path']}/{self._Instance.GetModel().Name}_Offers{len(self._Instance.GetOffers())}.{src.init.settings['MiniZinc']['input_ext']}", "w")
+
+        self.__ModelFile.truncate(0)
+        self.__DataFile.truncate(0)
+
     def __del__(self):
         """
         Destroys the created temporary files when solver goes out of scope.
         """
         self.__ModelFile.close()
-        unlink(self.__ModelFile.name)
-
         self.__DataFile.close()
-        unlink(self.__DataFile.name)
+
+        if not self.__SaveFlag:
+            unlink(self.__ModelFile.name)
+            unlink(self.__DataFile.name)
 
     def __GetOrComponents(self) -> list:
         """
@@ -67,131 +77,175 @@ class MiniZinc_Solver(Solver):
                 N = len(Comp.HardwareRequirements)
         return N
 
-    def __ComputeMiniZincModel(self):
+    def __ComputeMiniZincModel(self, surrogateResults):
         """
         Converts the current Model into a MiniZinc model file.
         """
         if src.init.settings['MiniZinc']['formalization'] == 1:
-            from src.New.Solvers.Formalization1.ModelTranslation import GetMiniZincConstraints, StringToBytes
+            from src.New.Solvers.Formalization1.ModelTranslation import GetMiniZincConstraints, GetHeaders, GetBasicAllocation, GetComponentModels, GetObjective, BeginIf, EndIf, GetORConstraint
         else:
-            from src.New.Solvers.Formalization2.ModelTranslation import GetMiniZincConstraints
+            from src.New.Solvers.Formalization2.ModelTranslation import GetMiniZincConstraints, GetHeaders, GetBasicAllocation, GetComponentModels, GetObjective
 
-        self.__ModelFile.write(StringToBytes('include "Modules/Formalization' + str(src.init.settings['MiniZinc']['formalization']) + '/GeneralVariables.mzn";\n'))
-        self.__ModelFile.write(StringToBytes('include "Modules/Formalization' + str(src.init.settings['MiniZinc']['formalization']) + '/GeneralConstraints.mzn";\n\n'))
+        for header in GetHeaders(self._Instance.GetSB(), False):
+            self.__ModelFile.write(header)
 
-        if self._Instance.GetSB():
-            self.__ModelFile.write(StringToBytes('include "Modules/Formalization' + str(src.init.settings['MiniZinc']['formalization']) + '/SymmetryBreaking.mzn";\n\n'))
-
-        for index, Comp in enumerate(self._Instance.GetModel().Components):
-            self.__ModelFile.write(StringToBytes("int: " + Comp.Name + " = " + str(index + 1) + ";\n"))
-        self.__ModelFile.write(b'\n')
+        for item in GetComponentModels(self._Instance.GetModel().Components):
+            self.__ModelFile.write(item)
 
         for item in GetMiniZincConstraints():
             self.__ModelFile.write(item)
 
         OrComponents = self.__GetOrComponents()
-        self.__ModelFile.write(StringToBytes("constraint basicAllocation(AssignmentMatrix, {"))
-        
-        for i, Component in enumerate(OrComponents):
-            if i != len(OrComponents) - 1:
-                self.__ModelFile.write(StringToBytes(Component + ", "))
-            else:
-                self.__ModelFile.write(StringToBytes(Component))
-        self.__ModelFile.write(StringToBytes("}, "))
-        self.__ModelFile.write(StringToBytes("S, VM);\n"))
+        self.__ModelFile.write(GetBasicAllocation(OrComponents))
 
-        for Constraint in self._Instance.GetModel().GetRestrictions():
-            excluded = 0
+        CheckedComponents = []
+        AditionalRestrictions = []
 
-            if Constraint.GetType().endswith("Bound"):
-                for C in Constraint.GetElement("Components"):
-                    if C in OrComponents:
-                        excluded = 1
-                        break
+        for Comp in self._Instance.GetModel().Components:
+            try:
+                temp = Restriction("EqualBound")
+                temp.AddElement(("Components", [Comp.Name]))
+                temp.AddElement(("Bound", surrogateResults[Comp.Name]))
 
-            elif Constraint.GetType() == "RequireProvide":
-                if Constraint.GetElement("ProvideComponent") in OrComponents or Constraint.GetElement("RequireComponent") in OrComponents:
-                    excluded = 1
-
-            if excluded == 1:
-                excluded = 0
+                CheckedComponents.append(Comp.Name)
+                AditionalRestrictions.append(temp)
+            except KeyError:
                 continue
 
-            for translation in GetMiniZincConstraints(Constraint):
-                self.__ModelFile.write(StringToBytes(translation))
+        indexes = []
+        for i, Constraint in enumerate(self._Instance.GetModel().GetRestrictions()):
+            if Constraint.GetType().endswith("Bound") and len(Constraint.GetElement("Components")) == 1:
+                if Constraint.GetElement("Components")[0] in CheckedComponents:
+                    indexes.append(i)
+            elif Constraint.GetType().endswith("Bound"):
+                Removed = []
+                for Comp in Constraint.GetElement("Components"):
+                    if Comp in CheckedComponents:
+                        Removed.append(Comp)
+                        Constraint.Elements["Bound"] -= surrogateResults[Comp]
+                for Comp in Removed:
+                    Constraint.GetElement("Components").remove(Comp)
+                if Constraint.GetElement("Components") == []:
+                    indexes.append(i)
+            elif Constraint.GetType() == "RequireProvide" and Constraint.GetElement("RequireComponent") in CheckedComponents and Constraint.GetElement("ProvideComponent") in CheckedComponents:
+                indexes.append(i)
+            elif Constraint.GetType() == "BoundedRequireProvide" and Constraint.GetElement("RequireComponent") in CheckedComponents and Constraint.GetElement("ProvideComponent") in CheckedComponents:
+                indexes.append(i)
 
-        self.__ModelFile.write(StringToBytes("solve minimize sum(k in 1..VM)(Price[k]);\n"))
+        indexes.sort(reverse=True)
+
+        print(CheckedComponents)
+
+        for i in indexes:
+            self._Instance.GetModel().GetRestrictions().pop(i)
+
+        self._Instance.GetModel().GetRestrictions().extend(AditionalRestrictions)
+
+        for Constraint in self._Instance.GetModel().GetRestrictions():
+            for translation in GetMiniZincConstraints(Constraint):
+                self.__ModelFile.write(translation)
+
+        self.__ModelFile.write(GetObjective())
         self.__ModelFile.seek(0)
-    
+
+    def __checkAppearances(self, Comp) -> bool:
+        for Constraint in self._Instance.GetModel().GetRestrictions():
+            if Constraint.GetType().endswith("Bound"):
+                for key, item in Constraint.Elements.items():
+                    if key.find("Component") != -1:
+                        if Comp in item:
+                            return False
+        return True
+
+    def __GetExcludedComponents(self) -> list:
+        compList = []
+
+        for Constraint in self._Instance.GetModel().GetRestrictions():
+            if Constraint.GetType() == "Colocation" or Constraint.GetType() == "FullDeployment":
+                for Comp in Constraint.GetElement("Components"):
+                    if not Comp in compList and self.__checkAppearances(Comp):
+                        compList.append(Comp)
+        return compList
+
     def __GenerateSurrogateModel(self):
         """
         Generates the surrogate model from the Json model
         """
         if src.init.settings['MiniZinc']['formalization'] == 1:
-            from src.New.Solvers.Formalization1.ModelTranslation import GetMiniZincSurrogateConstraints, StringToBytes
+            from src.New.Solvers.Formalization1.ModelTranslation import GetMiniZincSurrogateConstraints, GetHeaders, GetSurrogateComponentModels, GetObjective, GetSurrogateBasicAllocation, BeginIf, GetORConstraint, GetORCloser, EndIf
         else:
-            from src.New.Solvers.Formalization2.ModelTranslation import GetMiniZincSurrogateConstraints
+            from src.New.Solvers.Formalization2.ModelTranslation import GetMiniZincSurrogateConstraints, GetHeaders, GetSurrogateComponentModels, GetObjective, GetSurrogateBasicAllocation
 
-        self.__ModelFile.write(StringToBytes('include "Modules/Formalization' + str(src.init.settings['MiniZinc']['formalization']) + '/SurrogateConstraints.mzn";\n\n'))
+        for item in GetHeaders(isSurrogate=True):
+            self.__ModelFile.write(item)
 
-        ExcludedFromSurrogate = []
-        for Constraint in self._Instance.GetModel().GetRestrictions():
-            if Constraint.GetType() == "Colocation" or Constraint.GetType() == "FullDeployment":
-                for Comp in Constraint.GetElement("Components"):
-                    if not Comp in ExcludedFromSurrogate:
-                        ExcludedFromSurrogate.append(Comp)
+        ExcludedFromSurrogate = self.__GetExcludedComponents()
 
-        for index, Comp in enumerate(self._Instance.GetModel().Components):
-            if Comp.Name not in ExcludedFromSurrogate:
-                self.__ModelFile.write(StringToBytes("var 0..1024: " + Comp.Name + ";\n"))
-        self.__ModelFile.write(b'\n')
+        for item in GetSurrogateComponentModels(self._Instance.GetModel().Components, ExcludedFromSurrogate):
+            self.__ModelFile.write(item)
 
         OrComponents = self.__GetOrComponents()
-        self.__ModelFile.write(StringToBytes("constraint basicAllocation({"))
-        
-        for i, Component in enumerate(self._Instance.GetModel().Components):
-            if (Component.Name in OrComponents) or (Component.Name in ExcludedFromSurrogate):
-                continue
-
-            if i != len(self._Instance.GetModel().Components) - 1:
-                self.__ModelFile.write(StringToBytes(Component.Name + ", "))
-            else:
-                self.__ModelFile.write(StringToBytes(Component.Name))
-        self.__ModelFile.write(StringToBytes("});\n"))
+        self.__ModelFile.write(GetSurrogateBasicAllocation(self._Instance.GetModel().Components, OrComponents, ExcludedFromSurrogate))
 
         for Constraint in self._Instance.GetModel().GetRestrictions():
 
             excluded = 0
-            if Constraint.GetType().endswith("Bound"):
-                for C in Constraint.GetElement("Components"):
-                    if C in OrComponents or C in ExcludedFromSurrogate:
+            for Comp in OrComponents:
+                for key, item in Constraint.Elements.items():
+                    if key.find("Component") != -1 and Comp in item:
                         excluded = 1
                         break
+                if excluded == 1:
+                    break
 
-            elif Constraint.GetType() == "RequireProvide":
-                if Constraint.GetElement("RequireComponent") in OrComponents or Constraint.GetElement("ProvideComponent") in OrComponents:
-                    excluded = 1
-                if Constraint.GetElement("RequireComponent") in ExcludedFromSurrogate or Constraint.GetElement("ProvideComponent") in ExcludedFromSurrogate:
-                    excluded = 1
+            if excluded == 0:
+                for Comp in ExcludedFromSurrogate:
+                    for key, item in Constraint.Elements.items():
+                        if key.find("Component") != -1 and Comp in item:
+                            excluded = 1
+                            break
+                    if excluded == 1:
+                        break
 
             if excluded == 1:
                 excluded = 0
                 continue
 
-            if Constraint.GetType().endswith("Bound") or Constraint.GetType() == "RequireProvide" or Constraint.GetType() == "ExclusiveDeployment":
+            if Constraint.GetType().endswith("Bound") or Constraint.GetType() == "RequireProvide":
                 for translation in GetMiniZincSurrogateConstraints(Constraint):
-                    self.__ModelFile.write(StringToBytes(translation))
+                    self.__ModelFile.write(translation)
 
-        self.__ModelFile.write(StringToBytes("solve minimize "))
-        for index, Comp in enumerate(self._Instance.GetModel().Components):
-            if Comp.Name in ExcludedFromSurrogate:
-                continue
+        for Comp in OrComponents:
+            self.__ModelFile.write(BeginIf(Comp))
 
-            if index != len(self._Instance.GetModel().Components) - 1:
-                self.__ModelFile.write(StringToBytes(Comp.Name + " + "))
-            else:
-                self.__ModelFile.write(StringToBytes(Comp.Name))
-        self.__ModelFile.write(StringToBytes(";"))
+            count = 0
+            for Constraint in self._Instance.GetModel().GetRestrictions():
+                if Constraint.GetType().endswith("Bound"):
+                    if Comp in Constraint.GetElement("Components"):
+                        count += 1
+                elif Constraint.GetType() == "RequireProvide":
+                    if Comp in Constraint.GetElement("RequireComponent") or Comp in Constraint.GetElement("ProvideComponent"):
+                        count += 1
+
+            for Constraint in self._Instance.GetModel().GetRestrictions():
+                if Constraint.GetType().endswith("Bound"):
+                    if Comp in Constraint.GetElement("Components"):
+                        self.__ModelFile.write(GetORConstraint(Constraint))
+
+                        count -= 1
+                        if count != 0:
+                            self.__ModelFile.write(b" /\ ")
+                elif Constraint.GetType() == "RequireProvide":
+                    if Comp in Constraint.GetElement("RequireComponent") or Comp in Constraint.GetElement("ProvideComponent"):
+                        self.__ModelFile.write(GetORConstraint(Constraint))
+                
+                        count -= 1
+                        if count != 0:
+                            self.__ModelFile.write(b" /\ ")
+            self.__ModelFile.write(EndIf())
+
+        self.__ModelFile.write(GetORCloser(OrComponents))
+        self.__ModelFile.write(GetObjective(True, self._Instance.GetModel().Components, ExcludedFromSurrogate))
 
         self.__ModelFile.seek(0)
 
@@ -272,15 +326,11 @@ class MiniZinc_Solver(Solver):
 
     def Solve(self):
         self.__GenerateSurrogateModel()
-        system("pause")
         items = self.__SolveSurrogate()
 
-        print(items)
-
-        # This clears the file used for 
         self.__ModelFile.truncate(0)
 
-        self.__ComputeMiniZincModel()
+        self.__ComputeMiniZincModel(items)
         self.__ConvertDataFile()
 
         Mzn_Instance = mzn.Instance(self.__Solver, mzn.Model(self.__ModelFile.name))
